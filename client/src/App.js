@@ -2,20 +2,26 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 function App() {
-  const [username, setUsername] = useState("")
+  const [username, setUsername] = useState("");
+  const [viewingData, setViewingData] = useState([]);
 
   const url = "/api/get-top-ten";
   
   const axiosGet = async () => {
     axios.get(url, {
       params: {
-        user: username
+        user: username,
       }
     })
       .then(res => {
-        console.log(res)
+        if (res.data.statusCode === 400) {
+          console.log("fail")
+        } else {
+          setViewingData(res.data.data)
+        }
       })
       .catch(err => {
+        console.log("sdfsdf")
         console.log(err)
       })
   }
