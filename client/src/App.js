@@ -1,24 +1,39 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import axios from 'axios';
 
 function App() {
+  const [username, setUsername] = useState("");
+  const [viewingData, setViewingData] = useState([]);
+
+  const url = "/api/get-top-ten";
+  
+  const axiosGet = async () => {
+    axios.get(url, {
+      params: {
+        user: username,
+      }
+    })
+      .then(res => {
+        if (res.data.statusCode === 400) {
+          console.log("fail")
+        } else {
+          setViewingData(res.data.data)
+        }
+      })
+      .catch(err => {
+        console.log("sdfsdf")
+        console.log(err)
+      })
+  }
+
+  const changeHandler = e => {
+    setUsername(e.target.value)
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p className="bg-green-500 text-red-500">
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <input type="text" onChange={changeHandler} className="bg-gray-200 p-5" placeholder="Enter your username..." />
+      <button onClick={axiosGet} className="p-5 bg-blue-500 text-white">Get data</button>
     </div>
   );
 }
