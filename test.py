@@ -3,7 +3,7 @@ from forms import LoginForm
 import requests
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] 
+app.config['SECRET_KEY']
 
 def validate_MAL_login(user):
     try:
