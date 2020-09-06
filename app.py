@@ -45,7 +45,8 @@ def helper_get_genre_of_anime(anime_id):
         for g in genres:
             genre_list.append(g.string)
         return {"genres": genre_list, "statusCode": 200}
-    except:
+    except Exception as e:
+        print(e)
         return {"errorMessage": "Errored out", "statusCode": 400}
 
 
