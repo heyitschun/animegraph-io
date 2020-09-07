@@ -7,9 +7,9 @@ import { Home, User } from "./routes";
 
 function App() {
   return (
-    <div className="App">
+    <div className="bg-indigo-900 h-screen">
       <Router>
-        <div className="bg-red-200">
+        <div className="flex justify-center">
           <Switch>
             <Route exact path="/user">
               <User />
