@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import HelpIcon from "../components/icons/HelpIcon";
 import UsernameInput from "../components/UsernameInput";
+import HelpModal from "../components/HelpModal";
 
 
 function Home() {
+  const [showHelp, setShowHelp] = useState(false);
+
   return (
     <>
       <div className="mt-32 w-full">
+        <HelpModal showHelp={showHelp} setShowHelp={setShowHelp} />
         <motion.div
           initial={{ y: -250 }}
           animate={{ y: 10 }}
@@ -23,7 +27,9 @@ function Home() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5, duration: 1 }}
         >
-          <button className="focus:outline-none hover:scale-105">
+          <button
+            onClick={() => setShowHelp(true)}
+            className="focus:outline-none hover:scale-105">
             <HelpIcon />
           </button>
         </motion.div>
