@@ -12,9 +12,8 @@ app.config['SECRET_KEY'] = os.urandom(32)
 @app.route("/api/get-top-ten")
 def get_user_watch_history():
     #gets list of top 10 rated animes by user, anime info stored in dictionaries.
-    user = "hxhelena"
-    #user = request.args.get("user")
-    r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/all')
+    user = request.args.get("user")
+    r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed')
     if r.status_code == 200:
         userdata = json.loads(r.text)
         anime_history = sorted(userdata['anime'], key=itemgetter('score'))
