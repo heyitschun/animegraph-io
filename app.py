@@ -7,6 +7,7 @@ import os
 from bs4 import BeautifulSoup
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import select
+import re
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(32)
@@ -41,14 +42,18 @@ def get_user_watch_history():
         userdata = json.loads(r.text)
         anime_history = sorted(userdata['anime'], key=itemgetter('score'))
         for anime in anime_history:
-
             anime_id = anime['mal_id']
             anime_genres = get_genre_from_database(anime_id)
             anime['genres']= anime_genres['genres']
             if anime_in_database(anime_id) is None:
+                genre = str(anime['genres'])
                 new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']))
                 db.session.add(new_anime)
-        db.session.commit()
+        if db.session.new:
+            print ("new session")
+            db.session.commit()
+            db.session.execute("UPDATE animes SET genre = REPLACE(REPLACE(REPLACE(genre, '[', ''), ']', ''), '''', '')")
+            db.session.commit()
         return {"data": anime_history, "statusCode": 200}
     else:
         return {"data": "Failed", "statusCode": 400}
@@ -66,12 +71,8 @@ def get_genre_from_database(test_id):
         test_id_genres = helper_get_genre_of_anime(test_id)
     else:
         # database needs to be in list format for this to work.
-        genre_list.append(anime_exists.genre)
-        for genre in genre_list:
-            genre = genre.split(",")
-        for g in genre:
-            g = g.replace(' ','')
-        test_id_genres = {"genres": genre}
+        genres = re.split(r",\s*", anime_exists.genre)
+        test_id_genres = {"genres": genres}
     return test_id_genres
 
 
