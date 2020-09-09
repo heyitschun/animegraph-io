@@ -9,12 +9,14 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import select
 import re
 from collections import OrderedDict
+from operator import getitem 
+import itertools
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(32)
 POSTGRES = {
-    'user': 'postgres',
-    'pw': 'snowdoos',
+    'user': 'username',
+    'pw': 'password',
     'db': 'anime_list',
     'host': 'localhost',
     'port': '5432',
@@ -56,7 +58,8 @@ def get_user_watch_history():
             db.session.execute("UPDATE animes SET genre = REPLACE(REPLACE(REPLACE(genre, '[', ''), ']', ''), '''', '')")
             db.session.commit()
         data = {"data": anime_history, "statusCode": 200}
-        return data
+        top_three = get_top_three_genres(data)
+        return top_three
     else:
         return {"data": "Failed", "statusCode": 400}
 
@@ -103,21 +106,24 @@ def get_top_three_genres(animes):
     # add genre to dictionary if the genre is not in dictionary keys, otherwise increase value by 1
     dict_of_genres = {} # {"Shounen": 5, "Adventure": 10}
     for a in data:
+        #if a["score"] < 0:
+        #    continue
         for g in a["genres"]:
             if g not in dict_of_genres.keys():
                 dict_of_genres[g] = {}
                 dict_of_genres[g]["animes"] = []
-                dict_of_genres[g]["occurences"] = 1
+                dict_of_genres[g]["occurrences"] = 1
             else:
-                dict_of_genres[g]["occurences"] += 1
-            dict_of_genres[g]["animes"].append(a["mal_id"])
+                dict_of_genres[g]["occurrences"] += 1
+            dict_of_genres[g]["animes"].append(a)
+    dict_of_genres = OrderedDict(sorted(dict_of_genres.items(), key = lambda x:getitem(x[1], 'occurrences'), reverse=True))
     # sorted_genres = OrderedDict(sorted(dict_of_genres.items(), key=lambda x: x["occurences"][1]))
     # {"Shounen": {
     #     "animes": ["ani1", "ani2"], 
     #     "occurences": 10}
     # }
-    # top_three = list(sorted_genres.keys())[-3:]
-    return {"top_three": dict_of_genres}
+    top_three = dict(itertools.islice(dict_of_genres.items(), 3))
+    return top_three
 
 
 @app.route("/", methods=['GET', 'POST'])
