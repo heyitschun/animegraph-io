@@ -132,13 +132,12 @@ def get_complete_list(animes):
     for genre, value in top_three.items():
         scores = [d["score"] for d in value["animes"]]
         scores_set = set(scores)
+        proper_length = min(20, len(value["animes"]))
         if len(scores_set) == 1:
-            proper_length = min(20, len(value["animes"]))
             random.shuffle(value["animes"])
             print (type(value["animes"]))
             value["animes"] = value["animes"][:proper_length]
         else:
-            proper_length = min(20, len(value["animes"]))
             value["animes"] = sorted(value["animes"], key=itemgetter("score"), reverse=True) 
             value["animes"] = value["animes"][:proper_length]
     return top_three
