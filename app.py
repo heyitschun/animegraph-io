@@ -43,6 +43,10 @@ def get_user_watch_history():
             anime_id = anime['mal_id']
             anime_genres = get_genre_from_database(anime_id)
             anime['genres']= anime_genres['genres']
+            if anime_in_database(anime_id) is None:
+                new_anime = animes(anime_id = anime_id, title = anime['title'], genre = anime['genres'])
+                db.session.add(new_anime)
+        db.session.commit()
         return {"data": anime_history, "statusCode": 200}
     else:
         return {"data": "Failed", "statusCode": 400}
@@ -81,6 +85,7 @@ def helper_get_genre_of_anime(anime_id):
         genre_list= []
         for g in genres:
             genre_list.append(g.string)
+        
         return {"genres": genre_list, "statusCode": 200}
     except Exception as e:
         return {"errorMessage": "Errored out", "statusCode": 400}
