@@ -8,12 +8,13 @@ from bs4 import BeautifulSoup
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import select
 import re
+from collections import OrderedDict
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(32)
 POSTGRES = {
-    'user': 'username',
-    'pw': 'password',
+    'user': 'postgres',
+    'pw': 'snowdoos',
     'db': 'anime_list',
     'host': 'localhost',
     'port': '5432',
@@ -30,8 +31,8 @@ class animes(db.Model):
     title = db.Column('title', db.VARCHAR)
     genre = db.Column('genre', db.VARCHAR)
 
-    
 from app import db
+
 @app.route("/api/get-top-ten")
 def get_user_watch_history():
     #gets list of top 10 rated animes by user, anime info stored in dictionaries.
@@ -54,7 +55,8 @@ def get_user_watch_history():
             db.session.commit()
             db.session.execute("UPDATE animes SET genre = REPLACE(REPLACE(REPLACE(genre, '[', ''), ']', ''), '''', '')")
             db.session.commit()
-        return {"data": anime_history, "statusCode": 200}
+        data = {"data": anime_history, "statusCode": 200}
+        return data
     else:
         return {"data": "Failed", "statusCode": 400}
 
@@ -64,8 +66,6 @@ def anime_in_database(test_id):
 
 def get_genre_from_database(test_id):
     anime_exists = anime_in_database(test_id)
-    genre_list = []
-    final_list = []
     if anime_exists is None:
         # if not in database, grabs from webscrape
         test_id_genres = helper_get_genre_of_anime(test_id)
@@ -96,6 +96,28 @@ def helper_get_genre_of_anime(anime_id):
         return {"genres": genre_list, "statusCode": 200}
     except Exception as e:
         return {"errorMessage": "Errored out", "statusCode": 400}
+
+
+def get_top_three_genres(animes):
+    data = animes["data"]
+    # add genre to dictionary if the genre is not in dictionary keys, otherwise increase value by 1
+    dict_of_genres = {} # {"Shounen": 5, "Adventure": 10}
+    for a in data:
+        for g in a["genres"]:
+            if g not in dict_of_genres.keys():
+                dict_of_genres[g] = {}
+                dict_of_genres[g]["animes"] = []
+                dict_of_genres[g]["occurences"] = 1
+            else:
+                dict_of_genres[g]["occurences"] += 1
+            dict_of_genres[g]["animes"].append(a["mal_id"])
+    # sorted_genres = OrderedDict(sorted(dict_of_genres.items(), key=lambda x: x["occurences"][1]))
+    # {"Shounen": {
+    #     "animes": ["ani1", "ani2"], 
+    #     "occurences": 10}
+    # }
+    # top_three = list(sorted_genres.keys())[-3:]
+    return {"top_three": dict_of_genres}
 
 
 @app.route("/", methods=['GET', 'POST'])
