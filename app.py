@@ -11,6 +11,8 @@ import re
 from collections import OrderedDict
 from operator import getitem 
 import itertools
+import random
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(32)
@@ -37,6 +39,7 @@ from app import db
 
 @app.route("/api/get-top-ten")
 def get_user_watch_history():
+    start = time.time()
     #gets list of top 10 rated animes by user, anime info stored in dictionaries.
     user = request.args.get("user")
     r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed')
@@ -58,7 +61,9 @@ def get_user_watch_history():
             db.session.execute("UPDATE animes SET genre = REPLACE(REPLACE(REPLACE(genre, '[', ''), ']', ''), '''', '')")
             db.session.commit()
         data = {"data": anime_history, "statusCode": 200}
-        top_three = get_top_three_genres(data)
+        top_three = get_complete_list(data)
+        end = time.time()
+        print (end - start)
         return top_three
     else:
         return {"data": "Failed", "statusCode": 400}
@@ -105,9 +110,10 @@ def get_top_three_genres(animes):
     data = animes["data"]
     # add genre to dictionary if the genre is not in dictionary keys, otherwise increase value by 1
     dict_of_genres = {} # {"Shounen": 5, "Adventure": 10}
+    scores = []
     for a in data:
-        #if a["score"] < 0:
-        #    continue
+        if a["score"] < 0:
+            continue
         for g in a["genres"]:
             if g not in dict_of_genres.keys():
                 dict_of_genres[g] = {}
@@ -115,26 +121,32 @@ def get_top_three_genres(animes):
                 dict_of_genres[g]["occurrences"] = 1
             else:
                 dict_of_genres[g]["occurrences"] += 1
+            #if this anime is within the top 20? 30?
             dict_of_genres[g]["animes"].append(a)
     dict_of_genres = OrderedDict(sorted(dict_of_genres.items(), key = lambda x:getitem(x[1], 'occurrences'), reverse=True))
-    # sorted_genres = OrderedDict(sorted(dict_of_genres.items(), key=lambda x: x["occurences"][1]))
-    # {"Shounen": {
-    #     "animes": ["ani1", "ani2"], 
-    #     "occurences": 10}
-    # }
     top_three = dict(itertools.islice(dict_of_genres.items(), 3))
     return top_three
 
+def get_complete_list(animes):
+    top_three = get_top_three_genres(animes)
+    for genre, value in top_three.items():
+        scores = [d["score"] for d in value["animes"]]
+        scores_set = set(scores)
+        if len(scores_set) == 1:
+            proper_length = min(20, len(value["animes"]))
+            random.shuffle(value["animes"])
+            print (type(value["animes"]))
+            value["animes"] = value["animes"][:proper_length]
+        else:
+            proper_length = min(20, len(value["animes"]))
+            value["animes"] = sorted(value["animes"], key=itemgetter("score"), reverse=True) 
+            value["animes"] = value["animes"][:proper_length]
+    return top_three
 
 @app.route("/", methods=['GET', 'POST'])
 def login():
     return "Hello"
 
-#create another app.route that returns the 3 most popular genres of a user via 
-# beautifulsoup, and updates my userdatabase
-    #given user list of animes, return the top 3 most popular genres in the list
-
-    
 
 if __name__ == '__main__':
     app.run(debug=True)
