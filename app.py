@@ -37,11 +37,12 @@ class animes(db.Model):
 
 from app import db
 
-@app.route("/api/get-top-ten")
+@app.route("/api/get-top-ten", methods=["GET"])
 def get_user_watch_history():
     start = time.time()
     #gets list of top 10 rated animes by user, anime info stored in dictionaries.
     user = request.args.get("user")
+    print(request.args)
     r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed')
     if r.status_code == 200:
         #transforms API call to readable data
@@ -66,7 +67,7 @@ def get_user_watch_history():
         print (end - start)
         return top_three
     else:
-        return {"data": "Failed", "statusCode": 400}
+        return {"data": "Failed", "statusCode": 600}
 
 def anime_in_database(test_id):
     genre = animes.query.filter_by(anime_id= test_id).first()
