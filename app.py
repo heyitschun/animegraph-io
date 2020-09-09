@@ -37,14 +37,16 @@ def get_user_watch_history():
     user = request.args.get("user")
     r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed')
     if r.status_code == 200:
+        #transforms API call to readable data
         userdata = json.loads(r.text)
         anime_history = sorted(userdata['anime'], key=itemgetter('score'))
         for anime in anime_history:
+
             anime_id = anime['mal_id']
             anime_genres = get_genre_from_database(anime_id)
             anime['genres']= anime_genres['genres']
             if anime_in_database(anime_id) is None:
-                new_anime = animes(anime_id = anime_id, title = anime['title'], genre = anime['genres'])
+                new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']))
                 db.session.add(new_anime)
         db.session.commit()
         return {"data": anime_history, "statusCode": 200}
@@ -58,13 +60,18 @@ def anime_in_database(test_id):
 def get_genre_from_database(test_id):
     anime_exists = anime_in_database(test_id)
     genre_list = []
+    final_list = []
     if anime_exists is None:
         # if not in database, grabs from webscrape
         test_id_genres = helper_get_genre_of_anime(test_id)
     else:
         # database needs to be in list format for this to work.
         genre_list.append(anime_exists.genre)
-        test_id_genres = {"genres": genre_list}
+        for genre in genre_list:
+            genre = genre.split(",")
+        for g in genre:
+            g = g.replace(' ','')
+        test_id_genres = {"genres": genre}
     return test_id_genres
 
 
@@ -85,7 +92,6 @@ def helper_get_genre_of_anime(anime_id):
         genre_list= []
         for g in genres:
             genre_list.append(g.string)
-        
         return {"genres": genre_list, "statusCode": 200}
     except Exception as e:
         return {"errorMessage": "Errored out", "statusCode": 400}
