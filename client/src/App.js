@@ -8,12 +8,8 @@ function App() {
       <Router>
         <div className="flex justify-center">
           <Switch>
-            <Route exact path="/user">
-              <User />
-            </Route>
-            <Route path="/">
-              <Home />
-            </Route>
+            <Route exact path="/" component={Home} />
+            <Route path="/user/:user" component={User} />
           </Switch>
         </div>
       </Router>

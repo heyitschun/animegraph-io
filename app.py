@@ -14,11 +14,14 @@ import itertools
 import random
 import time
 
+from dotenv import load_dotenv
+load_dotenv()
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(32)
 POSTGRES = {
-    'user': 'username',
-    'pw': 'password',
+    'user': os.getenv("POSTGRES_USER"),
+    'pw': os.getenv("POSTGRES_PASS"),
     'db': 'anime_list',
     'host': 'localhost',
     'port': '5432',
@@ -39,10 +42,8 @@ from app import db
 
 @app.route("/api/get-top-ten", methods=["GET"])
 def get_user_watch_history():
-    start = time.time()
     #gets list of top 10 rated animes by user, anime info stored in dictionaries.
     user = request.args.get("user")
-    print(request.args)
     r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed')
     if r.status_code == 200:
         #transforms API call to readable data
@@ -63,8 +64,6 @@ def get_user_watch_history():
             db.session.commit()
         data = {"data": anime_history, "statusCode": 200}
         top_three = get_complete_list(data)
-        end = time.time()
-        print (end - start)
         return top_three
     else:
         return {"data": "Failed", "statusCode": 600}
@@ -103,7 +102,7 @@ def helper_get_genre_of_anime(anime_id):
         for g in genres:
             genre_list.append(g.string)
         return {"genres": genre_list, "statusCode": 200}
-    except Exception as e:
+    except:
         return {"errorMessage": "Errored out", "statusCode": 400}
 
 
@@ -111,7 +110,6 @@ def get_top_three_genres(animes):
     data = animes["data"]
     # add genre to dictionary if the genre is not in dictionary keys, otherwise increase value by 1
     dict_of_genres = {} # {"Shounen": 5, "Adventure": 10}
-    scores = []
     for a in data:
         if a["score"] < 0:
             continue
@@ -130,7 +128,7 @@ def get_top_three_genres(animes):
 
 def get_complete_list(animes):
     top_three = get_top_three_genres(animes)
-    for genre, value in top_three.items():
+    for value in top_three.values():
         scores = [d["score"] for d in value["animes"]]
         scores_set = set(scores)
         proper_length = min(20, len(value["animes"]))
