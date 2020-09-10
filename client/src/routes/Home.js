@@ -3,24 +3,9 @@ import { motion } from "framer-motion";
 import HelpIcon from "../components/icons/HelpIcon";
 import UsernameInput from "../components/UsernameInput";
 import HelpModal from "../components/HelpModal";
-// import { useAxiosRequest } from "../hooks/HttpRequest";
-import axios from "axios";
 
-function Home() {
+function Home({ user }) {
   const [showHelp, setShowHelp] = useState(false);
-  const [username, setUsername] = useState("");
-
-  const getData = async (e) => {
-    e.preventDefault();
-    axios
-      .get("/api/get-top-ten", { params: { user: username } })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
 
   return (
     <>
@@ -54,18 +39,7 @@ function Home() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5, duration: 1 }}
         >
-          <input
-            type="text"
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Your MyAnimeList username..."
-            className="rounded focus:outline-none w-full p-2 font-mono text-lg text-center"
-          />
-          <button
-            onClick={getData}
-            className="transition duration-500 rounded py-2 px-5 md:ml-2 ml-0 mt-4 md:mt-0 md:w-1/5 w-full tracking-widest text-white font-bold border hover:text-indigo-900 hover:bg-white hover:border-indigo-900 text-center focus:outline-none"
-          >
-            GO
-          </button>
+          <UsernameInput />
         </motion.div>
       </div>
     </>
