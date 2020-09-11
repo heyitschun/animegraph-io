@@ -1,6 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useAxiosRequest } from "../hooks/HttpRequest";
+import objectMap from "../helpers/objectMap";
+import Footer from "../components/Footer";
 
 
 function User({ match }) {
@@ -13,21 +15,30 @@ function User({ match }) {
   }
 
   if (data.loading) {
-    display = <div>Loading</div>
+    display = <div className="mt-48 items-center flex flex-col">
+      <div className="loading"><div></div><div></div><div></div></div>
+        Loading...
+      </div>
   }
 
   if (data.data) {
-    // do stuff with data.data
-    // i.e. iter over each object and extract fields that we need
-    console.log(data.data)
+    let animes = [];
+    objectMap(data.data, (x) => {
+      animes = [...x.animes, ...animes]
+    });
+
+    display = animes.map((anime, i) => <li key={i}>
+        {anime.title}
+      </li>
+    );
   }
 
   return (
-    <div className="text-white">
-      <ul className="text-white">
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1 text-white">
         {display}
-        <li>hello</li>
-      </ul>
+      </div>
+      <Footer className="flex-shrink" />
     </div>
   );
 };
