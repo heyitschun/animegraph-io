@@ -134,7 +134,6 @@ def get_complete_list(animes):
         proper_length = min(20, len(value["animes"]))
         if len(scores_set) == 1:
             random.shuffle(value["animes"])
-            print (type(value["animes"]))
             value["animes"] = value["animes"][:proper_length]
         else:
             value["animes"] = sorted(value["animes"], key=itemgetter("score"), reverse=True) 
