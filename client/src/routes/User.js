@@ -4,6 +4,7 @@ import { useAxiosRequest } from "../hooks/HttpRequest";
 import objectMap from "../helpers/objectMap";
 import Footer from "../components/Footer";
 import InfoModal from "../components/InfoModal";
+import RetryIcon from "../components/icons/RetryIcon";
 
 
 function User({ match }) {
@@ -19,7 +20,17 @@ function User({ match }) {
   }
 
   if (data.error) {
-    display = <div>something went wrong</div>
+    display = [
+      <li className="text-center mt-48">Something went wrong :(</li>,
+      <li className="justify-center flex mt-5">
+        <button className="focus:outline-none">
+          <RetryIcon />
+        </button>
+      </li>,
+      <li className="text-center mt-2 text-sm">
+        Retry
+      </li>
+    ]
   }
 
   if (data.loading) {
@@ -47,8 +58,9 @@ function User({ match }) {
             <button
               onMouseEnter={(e) => handleAnime(e)}
               onMouseLeave={(e) => handleAnime(e)}
-              className="focus:outline-none">
-            {anime.title}
+              className="focus:outline-none"
+            >
+              {anime.title}
             </button>
           </li>
         </motion.div>
@@ -62,7 +74,13 @@ function User({ match }) {
       <InfoModal setShowInfo={setShowInfo} showInfo={showInfo} anime={null} />
       <div className="flex-1 text-white">
         <ul className="mt-10">
-          {display}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5, duration: .5 }}
+          >
+            {display}
+          </motion.div>
         </ul>
       </div>
       <Footer className="flex-shrink" />
