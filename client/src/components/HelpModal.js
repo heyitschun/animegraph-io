@@ -14,8 +14,7 @@ const helpVariants = {
   },
   visible: {
     y: "200px",
-    opacity: 1,
-    transition: { delay: 0.3}
+    opacity: 1
   }
 }
 

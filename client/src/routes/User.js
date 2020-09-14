@@ -52,13 +52,13 @@ function User({ match }) {
       return (
         <motion.div
           key={i}
-          className="hover:text-indigo-200 my-2"
+          className="my-2"
         >
           <li>
             <button
               onMouseEnter={(e) => handleAnime(e)}
               onMouseLeave={(e) => handleAnime(e)}
-              className="focus:outline-none"
+              className="hover:text-indigo-200 focus:outline-none"
             >
               {anime.title}
             </button>
