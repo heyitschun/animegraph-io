@@ -9,25 +9,30 @@ import RetryIcon from "../components/icons/RetryIcon";
 
 function User({ match }) {
   const [showInfo, setShowInfo] = useState(false);
+  const [infoPos, setInfoPos] = useState({left: 0, top: 0});
+  const [anime, setAnime] = useState({});
   const user = match.params.user;
   let data = useAxiosRequest(user);
   let display = null;
+  let animes = [];
 
   const handleAnime = (e) => {
     e.persist();
-    setShowInfo(!showInfo);
-    console.log(e.screenX, e.screenY)
+    let animeUnderCursor = animes.filter((a) => a.title === e.target.innerHTML);
+    setAnime(animeUnderCursor[0]);
+    setInfoPos({left: e.screenX, top: e.screenY});
+    setShowInfo(true);
   }
 
   if (data.error) {
     display = [
-      <li className="text-center mt-48">Something went wrong :(</li>,
+      <li className="text-center mt-48 font-mono">Something went wrong :(</li>,
       <li className="justify-center flex mt-5">
         <button className="focus:outline-none">
           <RetryIcon />
         </button>
       </li>,
-      <li className="text-center mt-2 text-sm">
+      <li className="font-mono text-center mt-2 text-sm">
         Retry
       </li>
     ]
@@ -38,12 +43,11 @@ function User({ match }) {
       <li key="load-anim" className="justify-center flex mt-48">
         <div className="loading"><div></div><div></div><div></div></div>
       </li>,
-      <li key="load-text" className="text-center">Loading...</li>
+      <li key="load-text" className="text-center font-mono">Loading...</li>
     ]
   }
 
   if (data.data) {
-    let animes = [];
     objectMap(data.data, (x) => {
       animes = [...x.animes, ...animes]
     });
@@ -57,7 +61,7 @@ function User({ match }) {
           <li>
             <button
               onMouseEnter={(e) => handleAnime(e)}
-              onMouseLeave={(e) => handleAnime(e)}
+              onMouseLeave={() => setShowInfo(false)}
               className="hover:text-indigo-200 focus:outline-none"
             >
               {anime.title}
@@ -71,9 +75,14 @@ function User({ match }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <InfoModal setShowInfo={setShowInfo} showInfo={showInfo} anime={null} />
+      <InfoModal
+        setShowInfo={setShowInfo}
+        showInfo={showInfo}
+        anime={anime}
+        infoPos={infoPos}
+      />
       <div className="flex-1 text-white">
-        <ul className="mt-10">
+        <ul className="mt-32">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
