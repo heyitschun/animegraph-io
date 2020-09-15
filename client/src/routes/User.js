@@ -56,13 +56,13 @@ function User({ match }) {
       return (
         <motion.div
           key={i}
-          className="my-2"
+          className="my-1"
         >
           <li>
             <button
               onMouseEnter={(e) => handleAnime(e)}
               onMouseLeave={() => setShowInfo(false)}
-              className="hover:text-indigo-200 focus:outline-none"
+              className="hover:text-indigo-200 text-sm text-left focus:outline-none"
             >
               {anime.title}
             </button>
@@ -74,23 +74,31 @@ function User({ match }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen w-full flex flex-col">
       <InfoModal
         setShowInfo={setShowInfo}
         showInfo={showInfo}
         anime={anime}
         infoPos={infoPos}
       />
-      <div className="flex-1 text-white">
-        <ul className="mt-32">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5, duration: .5 }}
-          >
-            {display}
-          </motion.div>
-        </ul>
+      <div className="mt-32 border flex flex-row flex-1 text-white">
+        <div className="w-1/4 border border-green-500">
+          <ul>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5, duration: .5 }}
+            >
+              {display}
+            </motion.div>
+          </ul>
+        </div>
+        <div className="w-1/2 border border-red-500">
+          middle
+        </div>
+        <div className="w-1/4 border border-yellow-500">
+          right
+        </div>
       </div>
       <Footer className="flex-shrink" />
     </div>
