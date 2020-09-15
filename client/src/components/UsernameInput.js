@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 
 function UsernameInput() {
+  const history = useHistory();
   const [username, setUsername] = useState("");
 
   const handleChange = (e) => {
@@ -15,6 +16,11 @@ function UsernameInput() {
       <input
         type="text"
         onChange={(e) => handleChange(e)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            history.push(`/user/${username}`);
+          }
+        }}
         placeholder="Your MyAnimeList username..."
         className="rounded focus:outline-none w-full md:w-4/5 p-2 font-mono text-lg text-center"
       />
