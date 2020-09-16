@@ -20,8 +20,8 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(32)
 POSTGRES = {
-    'user': os.getenv("POSTGRES_USER"),
-    'pw': os.getenv("POSTGRES_PASS"),
+    'user': "username",
+    'pw': "password",
     'db': 'anime_list',
     'host': 'localhost',
     'port': '5432',
@@ -37,6 +37,8 @@ class animes(db.Model):
     anime_id = db.Column('anime_id', db.INTEGER, primary_key=True)
     title = db.Column('title', db.VARCHAR)
     genre = db.Column('genre', db.VARCHAR)
+    members = db.Column('members', db.INTEGER)
+    score = db.Column('score', db.FLOAT)
 
 from app import db
 
@@ -51,11 +53,13 @@ def get_user_watch_history():
         anime_history = sorted(userdata['anime'], key=itemgetter('score'))
         for anime in anime_history:
             anime_id = anime['mal_id']
-            anime_genres = get_genre_from_database(anime_id)
-            anime['genres']= anime_genres['genres']
+            anime_genres_members = get_needed_data_from_database(anime_id)
+            anime['genres']= anime_genres_members['genres']
+            anime['members']= anime_genres_members['members']
+            anime['score'] = anime_genres_members['score']
             if anime_in_database(anime_id) is None:
                 genre = str(anime['genres'])
-                new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']))
+                new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']), members = anime['members'], score = anime['score'])
                 db.session.add(new_anime)
         if db.session.new:
             print ("new session")
@@ -72,16 +76,18 @@ def anime_in_database(test_id):
     genre = animes.query.filter_by(anime_id= test_id).first()
     return genre
 
-def get_genre_from_database(test_id):
+def get_needed_data_from_database(test_id):
     anime_exists = anime_in_database(test_id)
     if anime_exists is None:
         # if not in database, grabs from webscrape
-        test_id_genres = helper_get_genre_of_anime(test_id)
+        test_id_data = helper_get_needed_data_of_anime(test_id)
     else:
         # database needs to be in list format for this to work.
         genres = re.split(r",\s*", anime_exists.genre)
-        test_id_genres = {"genres": genres}
-    return test_id_genres
+        members = anime_exists.members
+        score = anime_exists.score
+        test_id_data = {"genres": genres, "members": members, "score": score}
+    return test_id_data
 
 
 @app.route("/api/get-anime-genre")
@@ -90,25 +96,38 @@ def get_anime_genre():
     if request.args.get("id") == None:
         return {"data": "Failed", "statusCode": 400}
 
+<<<<<<< HEAD
+    return helper_get_needed_data_of_anime(request.args.get("id"))
+
+def helper_get_needed_data_of_anime(anime_id):
+=======
     return helper_get_genre_of_anime(request.args.get("id"))
 
 def helper_get_genre_of_anime(anime_id):
+>>>>>>> 1248252763e2ac54bdbeaa8066d6f8d506c467b5
     #gets genre of anime given ID, scraped from MAL using BeautifulSoup, can replace later w database.
     try:
         URL = 'https://myanimelist.net/anime/' + str(anime_id)
         animepage = requests.get(URL).text
         soup = BeautifulSoup(animepage, 'lxml')
         genres = soup.find_all('span', itemprop='genre')
+<<<<<<< HEAD
+        members = soup.find("span", class_ = "numbers members").text
+        members = (members[8:])
+        members = int(members.replace(",", ''))
+        score = float(soup.find("div", class_ = "score-label").text)
+=======
         members = soup.find_all("div", )
+>>>>>>> 1248252763e2ac54bdbeaa8066d6f8d506c467b5
         genre_list= []
         for g in genres:
             genre_list.append(g.string)
-        return {"genres": genre_list, "statusCode": 200}
+        return {"genres": genre_list, "members": members, "score": score, "statusCode": 200}
     except:
         return {"errorMessage": "Errored out", "statusCode": 400}
 
 
-def get_top_three_genres(animes):
+def get_top_three_genres(animes): 
     data = animes["data"]
     # add genre to dictionary if the genre is not in dictionary keys, otherwise increase value by 1
     dict_of_genres = {} # {"Shounen": 5, "Adventure": 10}
