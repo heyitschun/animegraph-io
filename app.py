@@ -91,6 +91,7 @@ def get_anime_genre():
         return {"data": "Failed", "statusCode": 400}
 
     return helper_get_genre_of_anime(request.args.get("id"))
+
 def helper_get_genre_of_anime(anime_id):
     #gets genre of anime given ID, scraped from MAL using BeautifulSoup, can replace later w database.
     try:
@@ -98,6 +99,7 @@ def helper_get_genre_of_anime(anime_id):
         animepage = requests.get(URL).text
         soup = BeautifulSoup(animepage, 'lxml')
         genres = soup.find_all('span', itemprop='genre')
+        members = soup.find_all("div", )
         genre_list= []
         for g in genres:
             genre_list.append(g.string)
@@ -131,7 +133,7 @@ def get_complete_list(animes):
     for value in top_three.values():
         scores = [d["score"] for d in value["animes"]]
         scores_set = set(scores)
-        proper_length = min(20, len(value["animes"]))
+        proper_length = min(50, len(value["animes"]))
         if len(scores_set) == 1:
             random.shuffle(value["animes"])
             value["animes"] = value["animes"][:proper_length]
