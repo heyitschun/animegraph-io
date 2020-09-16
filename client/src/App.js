@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { Home, User } from "./routes";
+import { Home, User, Chart } from "./routes";
+
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
           <Switch>
             <Route exact path="/" component={Home} />
             <Route path="/user/:user" component={User} />
+            <Route path="/chart" component={Chart} />
           </Switch>
         </div>
       </Router>
