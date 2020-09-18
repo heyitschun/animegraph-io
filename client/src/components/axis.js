@@ -1,8 +1,8 @@
-import React from "react";
-
-const Axis = ({ domain = [0, 100], range = [10, 290] }) => {
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { scaleLinear } from "d3";
+const Axis = ({ domain = [100, 400], range = [10, 2000] }) => {
   const ticks = useMemo(() => {
-    const xScale = d3.scaleLinear().domain(domain).range(range);
+    const xScale = scaleLinear().domain(domain).range(range);
     const width = range[1] - range[0];
     const pixelsPerTick = 30;
     const numberOfTicksTarget = Math.max(1, Math.floor(width / pixelsPerTick));
@@ -36,3 +36,4 @@ const Axis = ({ domain = [0, 100], range = [10, 290] }) => {
     </svg>
   );
 };
+export default Axis;

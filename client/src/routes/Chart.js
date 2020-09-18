@@ -4,6 +4,7 @@ import { create, schemeAccent } from "d3";
 import { scaleLinear, scaleOrdinal } from "d3-scale";
 import objectMap from "../helpers/objectMap";
 import InfoModal from "../components/InfoModal";
+import ChartWithDimensions from "../components/ChartDimensions";
 
 function Chart() {
   const [data, setData] = useState();
@@ -13,6 +14,13 @@ function Chart() {
   const [showInfo, setShowInfo] = useState(false);
   const [infoPos, setInfoPos] = useState({ left: 0, top: 0 });
   const [anime, setAnime] = useState({});
+  const [animeBubbles, setAnimeBubbles] = useState([]);
+
+  let animes = [];
+  let domain = [0, 0];
+  let scoreDomain = [Infinity, 0];
+  let dateDomain = [Infinity, 0];
+  let memberDomain = [Infinity, 0];
 
   // Data pull
   useEffect(() => {
@@ -21,11 +29,6 @@ function Chart() {
       setGenres(Object.keys(data.data));
     });
   }, []);
-
-  let animes = [];
-  let domain = [0, 0];
-  let scoreDomain = [Infinity, 0];
-  let dateDomain = [Infinity, 0];
 
   if (data !== undefined) {
     objectMap(data, (genre) => {
@@ -37,11 +40,13 @@ function Chart() {
       var start_date = Date.parse(a.start_date);
       if (start_date > dateDomain[1]) dateDomain[1] = start_date;
       else if (start_date < dateDomain[0]) dateDomain[0] = start_date;
+      var members = a.members;
+      if (members > memberDomain[1]) memberDomain[1] = members;
+      else if (members < memberDomain[1]) memberDomain[0] = members;
     });
   }
 
   let genreFilter;
-  let bubblePlot;
 
   // Event handlers
   const logData = () => {
@@ -54,8 +59,11 @@ function Chart() {
 
   const plotGenre = (e) => {
     e.preventDefault();
-    let animes2 = data[e.target.innerHTML];
-    console.log(animes2);
+    if (e.target.innerHTML !== "All") {
+      let animesgenre = data[e.target.innerHTML];
+      animes = [...animesgenre.animes];
+    }
+    setAnimeBubbles(animes);
   };
 
   const handleAnime = (e, i) => {
@@ -98,22 +106,27 @@ function Chart() {
           height={chartDims.height}
           viewBox="0 0 100 50"
         >
-          {animes.map((a, i) => (
-            <circle
-              cx={i * 10}
-              cy={a.score}
-              r="1"
-              key={i}
-              fill="white"
-              stroke="white"
-              onMouseEnter={(e) => handleAnime(e, i)}
-            />
+          <ChartWithDimensions></ChartWithDimensions>
+          {animeBubbles.map((a, i) => (
+            <a href={a.url} target="_blank" rel="noopener referrer">
+              <circle
+                cx={i * 10}
+                cy={a.score}
+                r={a.members / 100000}
+                key={i}
+                fill="white"
+                stroke="white"
+                onMouseEnter={(e) => handleAnime(e, i)}
+              />
+            </a>
           ))}
-          {bubblePlot}
         </svg>
       </div>
       <div className="flex justify-between">
-        <button className="py-2 px-5 bg-white text-black my-2 rounded">
+        <button
+          className="py-2 px-5 bg-white text-black my-2 rounded"
+          onClick={(e) => plotGenre(e)}
+        >
           All
         </button>
         {genreFilter}
