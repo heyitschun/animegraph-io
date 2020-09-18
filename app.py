@@ -96,29 +96,23 @@ def get_anime_genre():
     if request.args.get("id") == None:
         return {"data": "Failed", "statusCode": 400}
 
-<<<<<<< HEAD
     return helper_get_needed_data_of_anime(request.args.get("id"))
 
 def helper_get_needed_data_of_anime(anime_id):
-=======
     return helper_get_genre_of_anime(request.args.get("id"))
 
 def helper_get_genre_of_anime(anime_id):
->>>>>>> 1248252763e2ac54bdbeaa8066d6f8d506c467b5
     #gets genre of anime given ID, scraped from MAL using BeautifulSoup, can replace later w database.
     try:
         URL = 'https://myanimelist.net/anime/' + str(anime_id)
         animepage = requests.get(URL).text
         soup = BeautifulSoup(animepage, 'lxml')
         genres = soup.find_all('span', itemprop='genre')
-<<<<<<< HEAD
         members = soup.find("span", class_ = "numbers members").text
         members = (members[8:])
         members = int(members.replace(",", ''))
         score = float(soup.find("div", class_ = "score-label").text)
-=======
         members = soup.find_all("div", )
->>>>>>> 1248252763e2ac54bdbeaa8066d6f8d506c467b5
         genre_list= []
         for g in genres:
             genre_list.append(g.string)
