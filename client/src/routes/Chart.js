@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { scaleTime, scaleSequential, interpolateCool } from "d3";
+import {
+  interpolateCool,
+  scaleSequential,
+  scaleTime,
+} from "d3";
+import { axisBottom, axisRight } from "d3-axis";
 import { scaleLinear } from "d3-scale";
+import { select } from "d3-selection";
 import objectMap from "../helpers/objectMap";
 import InfoModal from "../components/InfoModal";
-import ChartWithDimensions from "../components/ChartDimensions";
 
 function Chart() {
   const [data, setData] = useState();
@@ -17,7 +22,6 @@ function Chart() {
   const [animeBubbles, setAnimeBubbles] = useState([]);
 
   let animes = [];
-  let domain = [0, 0];
   let scoreDomain = [Infinity, 0];
   let dateDomain = [Infinity, 0];
   let memberDomain = [Infinity, 0];
@@ -51,7 +55,7 @@ function Chart() {
 
   // d3.js stuff START
   
-  // sequential color scale for bubble color
+  // sequential color scale for bubble color to rep ratings
   const seqScale = scaleSequential().domain([0, 120]).interpolator(interpolateCool);
 
   const ratings = {
@@ -71,21 +75,19 @@ function Chart() {
     .domain([scoreDomain[0]-0.5, scoreDomain[1]+0.5])
     .range([chartDims.height, 0]);
 
+  // Axes
+  const xAxis = axisBottom()
+    .scale(dateScale)
+    .ticks(animes.length / 2);
+
+  const yAxis = axisRight()
+    .scale(scoreScale)
+    .ticks(3);
+
+
+  console.log(xAxis)
   // d3.js stuff END
   
-  // Ratings legend
-  let ratingsLegend = Object.keys(ratings).map((r, i) => {
-    return (
-      <button
-        className="cursor-text focus:outline-none rounded-full m-2 bg-white font-bold text-black text-sm w-12 h-12 text-center items-center"
-        style={{ "background-color": ratings[r] }}
-        key={i}
-      >
-        {r}
-      </button>
-    )
-  });
-
   let genreFilter;
 
   // Event handlers
@@ -114,13 +116,27 @@ function Chart() {
     return (
       <button
         key={i}
-        className="py-2 px-5 bg-white text-black my-2 rounded"
+        className="focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 bg-white text-black my-2 rounded text-indigo-900 hover:text-white hover:bg-indigo-900 border"
         onClick={(e) => plotGenre(e)}
       >
         {g}
       </button>
     );
   });
+
+  // Ratings legend
+  let ratingsLegend = Object.keys(ratings).map((r, i) => {
+    return (
+      <button
+        className="cursor-text focus:outline-none rounded-full m-2 bg-white font-bold text-black text-sm w-12 h-12 text-center items-center"
+        style={{ "backgroundColor": ratings[r] }}
+        key={i}
+      >
+        {r}
+      </button>
+    )
+  });
+
 
   return (
     <div className="text-white flex flex-col">
@@ -141,7 +157,6 @@ function Chart() {
           width={chartDims.width}
           height={chartDims.height}
         >
-          <ChartWithDimensions></ChartWithDimensions>
           {animeBubbles.map((a, i) => (
             <a key={i} href={a.url} target="_blank" rel="noopener noreferrer">
               <circle
@@ -154,11 +169,15 @@ function Chart() {
               />
             </a>
           ))}
+          <g>
+            <g ref={node => select(node).call(xAxis)} className="z-10" />
+            <g ref={node => select(node).call(yAxis)} className="z-10" />
+          </g>
         </svg>
       </div>
       <div className="flex justify-between">
         <button
-          className="py-2 px-5 bg-white text-black my-2 rounded"
+          className="focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 bg-white text-black my-2 rounded text-indigo-900 hover:text-white hover:bg-indigo-900 border"
           onClick={(e) => plotGenre(e)}
         >
           All

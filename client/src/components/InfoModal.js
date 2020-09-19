@@ -11,14 +11,12 @@ const helpVariants = {
 };
 
 function InfoModal({ anime, showInfo, setShowInfo, infoPos }) {
-  console.log(showInfo);
   return (
     <AnimatePresence exitBeforeEnter>
       {showInfo && (
         <motion.div
           className="z-50 w-auto h-auto absolute p-4 bg-indigo-900 text-white rounded shadow border border-gray-100"
           style={{ left: 0, top: 0 }}
-          whileHover={() => setShowInfo(true)}
           onClick={() => setShowInfo(false)}
           variants={helpVariants}
           initial="hidden"
