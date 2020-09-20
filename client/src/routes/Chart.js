@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import axios from "axios";
 import {
   interpolateCool,
@@ -84,8 +85,6 @@ function Chart() {
     .scale(scoreScale)
     .ticks(3);
 
-
-  console.log(xAxis)
   // d3.js stuff END
   
   let genreFilter;
@@ -159,13 +158,15 @@ function Chart() {
         >
           {animeBubbles.map((a, i) => (
             <a key={i} href={a.url} target="_blank" rel="noopener noreferrer">
-              <circle
+              <motion.circle
                 cx={dateScale(new Date(a.start_date))}
-                cy={scoreScale(Number(a.score))}
                 r={a.members / 100000}
                 key={i}
                 fill={ratings[a.rating]}
                 onMouseEnter={(e) => handleAnime(e, i)}
+                animate={{ cy: [0, scoreScale(a.score)] }}
+                initial={{ cy: [0, 0] }}
+                transition={{ duration: 1, ease: "easeInOut" }}
               />
             </a>
           ))}
@@ -185,10 +186,26 @@ function Chart() {
         {genreFilter}
       </div>
       <div className="text-center tracking-wider font-bold text-sm mt-10 w-full">
-        Legend
+        <div>
+          Legend
+        </div>
       </div>
-      <div className="flex justify-center">
-        {ratingsLegend}
+      <div className="flex justify-center mt-10">
+        <div className="font-bold text-xs flex items-center uppercase">
+          PG Rating
+        </div>
+        <div>
+          {ratingsLegend}
+        </div>
+      </div>
+      <div className="flex justify-center mt-10">
+        <div className="w-1/5 font-bold text-xs flex items-center uppercase">
+          Community
+        </div>
+        <div className="w-4/5 flex justify-between items-center text-xs mx-10 font-bold">
+          <span className="text-black bg-white rounded-full flex items-center justify-center" style={{ "height": "50px", "width": "50px" }}>{memberDomain[0]}</span>
+          <span className="text-black bg-white rounded-full flex items-center justify-center" style={{ "height": "100px", "width": "100px" }}>{memberDomain[1]}</span>
+        </div>
       </div>
     </div>
   );
