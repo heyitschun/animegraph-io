@@ -63,7 +63,7 @@ def get_user_watch_history():
                 genres = anime_genres_members["genres"]
                 members = anime_genres_members["members"]
                 scores = anime_genres_members["score"]
-                anime['genres']= str(genres)
+                anime['genres']= genres
                 anime['members']= members
                 anime['score'] = float(scores)
                 if anime_in_database(anime_id) is None:
@@ -75,15 +75,15 @@ def get_user_watch_history():
                 db.session.commit()
                 db.session.execute("UPDATE animes SET genre = REPLACE(REPLACE(REPLACE(genre, '[', ''), ']', ''), '''', '')")
                 db.session.commit()
-            total_anime_history.append(anime_history)
-            #top_three = get_complete_list(data)
+            total_anime_history = total_anime_history + anime_history
             i += 1
             r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed/' + str(i))
             userdata = json.loads(r.text)
             print (userdata)
     
     data = {"data": total_anime_history, "statusCode": 200}
-    return data
+    top_three = get_complete_list(data)
+    return top_three
 
 
 def anime_in_database(test_id):
@@ -153,8 +153,6 @@ def get_top_three_genres(animes):
     # add genre to dictionary if the genre is not in dictionary keys, otherwise increase value by 1
     dict_of_genres = {} # {"Shounen": 5, "Adventure": 10}
     for a in data:
-        if a["score"] < 0:
-            continue
         for g in a["genres"]:
             if g not in dict_of_genres.keys():
                 dict_of_genres[g] = {}
