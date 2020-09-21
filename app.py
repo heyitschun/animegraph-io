@@ -46,36 +46,45 @@ from app import db
 def get_user_watch_history():
     #gets list of top 10 rated animes by user, anime info stored in dictionaries.
     user = request.args.get("user")
+    data = {}
+    total_anime_history = []
+    i = 1
     r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed')
-    if r.status_code == 200:
-        #transforms API call to readable data
-        userdata = json.loads(r.text)
-        anime_history = sorted(userdata['anime'], key=itemgetter('score'))
-        for anime in anime_history:
-            anime_id = anime['mal_id']
-            print (anime_id)
-            anime_genres_members = get_needed_data_from_database(anime_id)
-            print (anime_genres_members.keys())
-            genres = anime_genres_members["genres"]
-            members = anime_genres_members["members"]
-            scores = anime_genres_members["score"]
-            anime['genres']= str(genres)
-            anime['members']= members
-            anime['score'] = float(scores)
-            if anime_in_database(anime_id) is None:
-                genre = str(anime['genres'])
-                new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']), members = int(anime['members']), score = anime['score'])
-                db.session.add(new_anime)
-        if db.session.new:
-            print ("new session")
-            db.session.commit()
-            db.session.execute("UPDATE animes SET genre = REPLACE(REPLACE(REPLACE(genre, '[', ''), ']', ''), '''', '')")
-            db.session.commit()
-        data = {"data": anime_history, "statusCode": 200}
-        top_three = get_complete_list(data)
-        return top_three
-    else:
-        return {"data": "Failed", "statusCode": 600}
+    userdata = json.loads(r.text)
+    while 'anime' in userdata.keys() and len(userdata['anime']) != 0:
+            #transforms API call to readable data
+            userdata = json.loads(r.text)
+            anime_history = sorted(userdata['anime'], key=itemgetter('score'))
+            for anime in anime_history:
+                anime_id = anime['mal_id']
+                print (anime_id)
+                anime_genres_members = get_needed_data_from_database(anime_id)
+                print (anime_genres_members.keys())
+                genres = anime_genres_members["genres"]
+                members = anime_genres_members["members"]
+                scores = anime_genres_members["score"]
+                anime['genres']= str(genres)
+                anime['members']= members
+                anime['score'] = float(scores)
+                if anime_in_database(anime_id) is None:
+                    genre = str(anime['genres'])
+                    new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']), members = int(anime['members']), score = anime['score'])
+                    db.session.add(new_anime)
+            if db.session.new:
+                print ("new session")
+                db.session.commit()
+                db.session.execute("UPDATE animes SET genre = REPLACE(REPLACE(REPLACE(genre, '[', ''), ']', ''), '''', '')")
+                db.session.commit()
+            total_anime_history.append(anime_history)
+            #top_three = get_complete_list(data)
+            i += 1
+            r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed/' + str(i))
+            userdata = json.loads(r.text)
+            print (userdata)
+    
+    data = {"data": total_anime_history, "statusCode": 200}
+    return data
+
 
 def anime_in_database(test_id):
     genre = animes.query.filter_by(anime_id= test_id).first()
