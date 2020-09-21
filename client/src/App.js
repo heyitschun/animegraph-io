@@ -2,7 +2,6 @@ import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Home, User, Chart } from "./routes";
 
-
 function App() {
   return (
     <div className="bg-indigo-900 min-h-screen">

@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import {
-  interpolateCool,
-  scaleSequential,
-  scaleTime,
-} from "d3";
+import { interpolateCool, scaleSequential, scaleTime } from "d3";
 import { axisBottom, axisRight } from "d3-axis";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
@@ -26,7 +22,7 @@ function Chart() {
   let dateDomain = [Infinity, 0];
   let memberDomain = [Infinity, 0];
 
-  const DATA_URL = "/data/dummy.json";
+  const DATA_URL = "/data/dummydata.json";
   // Data pull
   useEffect(() => {
     axios.get(DATA_URL).then((data) => {
@@ -51,20 +47,22 @@ function Chart() {
       if (members > memberDomain[1]) memberDomain[1] = members;
       else if (members < memberDomain[1]) memberDomain[0] = members;
     });
-  };
+  }
 
   // d3.js stuff START
-  
+
   // sequential color scale for bubble color to rep ratings
-  const seqScale = scaleSequential().domain([0, 120]).interpolator(interpolateCool);
+  const seqScale = scaleSequential()
+    .domain([0, 120])
+    .interpolator(interpolateCool);
 
   const ratings = {
-    "G": seqScale(10),
-    "PG": seqScale(30),
+    G: seqScale(10),
+    PG: seqScale(30),
     "PG-13": seqScale(50),
-    "R": seqScale(70),
+    R: seqScale(70),
     "R+": seqScale(90),
-    "Rx": seqScale(110)
+    Rx: seqScale(110),
   };
 
   var dateScale = scaleTime()
@@ -72,22 +70,16 @@ function Chart() {
     .range([0, chartDims.width]);
 
   var scoreScale = scaleLinear()
-    .domain([scoreDomain[0]-0.5, scoreDomain[1]+0.5])
+    .domain([scoreDomain[0] - 0.5, scoreDomain[1] + 0.5])
     .range([chartDims.height, 0]);
 
   // Axes
-  const xAxis = axisBottom()
-    .scale(dateScale)
-    .ticks(animes.length / 2);
+  const xAxis = axisBottom().scale(dateScale).ticks(7);
 
-  const yAxis = axisRight()
-    .scale(scoreScale)
-    .ticks(3);
+  const yAxis = axisRight().scale(scoreScale).ticks(10);
 
-
-  console.log(xAxis)
   // d3.js stuff END
-  
+
   let genreFilter;
 
   // Event handlers
@@ -100,13 +92,14 @@ function Chart() {
     if (e.target.innerHTML !== "All") {
       let animesgenre = data[e.target.innerHTML];
       animes = [...animesgenre.animes];
+      console.log(animes);
     }
     setAnimeBubbles(animes);
   };
 
-  const handleAnime = (e, i) => {
+  const handleAnime = (e, title) => {
     e.persist();
-    let animeUnderCursor = animes.filter((a) => a.title === animes[i].title);
+    let animeUnderCursor = animes.filter((a) => a.title === title);
     setAnime(animeUnderCursor[0]);
     setInfoPos({ left: e.screenX, top: e.screenY });
     setShowInfo(true);
@@ -129,14 +122,17 @@ function Chart() {
     return (
       <button
         className="cursor-text focus:outline-none rounded-full m-2 bg-white font-bold text-black text-sm w-12 h-12 text-center items-center"
-        style={{ "backgroundColor": ratings[r] }}
+        style={{ backgroundColor: ratings[r] }}
         key={i}
       >
         {r}
       </button>
-    )
+    );
   });
 
+  const test = (a) => {
+    console.log(a);
+  };
 
   return (
     <div className="text-white flex flex-col">
@@ -153,25 +149,24 @@ function Chart() {
         Log Raw Data
       </button>
       <div className="w-full border">
-        <svg
-          width={chartDims.width}
-          height={chartDims.height}
-        >
+        <svg width={chartDims.width} height={chartDims.height}>
           {animeBubbles.map((a, i) => (
             <a key={i} href={a.url} target="_blank" rel="noopener noreferrer">
               <circle
+                fillOpacity="0.7"
                 cx={dateScale(new Date(a.start_date))}
                 cy={scoreScale(Number(a.score))}
                 r={a.members / 100000}
                 key={i}
                 fill={ratings[a.rating]}
-                onMouseEnter={(e) => handleAnime(e, i)}
+                onMouseEnter={(e) => handleAnime(e, a.title)}
+                onClick={() => test(a)}
               />
             </a>
           ))}
           <g>
-            <g ref={node => select(node).call(xAxis)} className="z-10" />
-            <g ref={node => select(node).call(yAxis)} className="z-10" />
+            <g ref={(node) => select(node).call(xAxis)} className="z-10" />
+            <g ref={(node) => select(node).call(yAxis)} className="z-10" />
           </g>
         </svg>
       </div>
@@ -187,9 +182,7 @@ function Chart() {
       <div className="text-center tracking-wider font-bold text-sm mt-10 w-full">
         Legend
       </div>
-      <div className="flex justify-center">
-        {ratingsLegend}
-      </div>
+      <div className="flex justify-center">{ratingsLegend}</div>
     </div>
   );
 }

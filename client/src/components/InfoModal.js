@@ -27,6 +27,8 @@ function InfoModal({ anime, showInfo, setShowInfo, infoPos }) {
             {anime.title}
             <hr className="my-2" />
             <img src={anime.image_url} alt={anime.title} />
+            <br />
+            <span>User Score: {anime.score}</span>
           </div>
         </motion.div>
       )}
