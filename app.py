@@ -53,13 +53,18 @@ def get_user_watch_history():
         anime_history = sorted(userdata['anime'], key=itemgetter('score'))
         for anime in anime_history:
             anime_id = anime['mal_id']
+            print (anime_id)
             anime_genres_members = get_needed_data_from_database(anime_id)
-            anime['genres']= anime_genres_members['genres']
-            anime['members']= anime_genres_members['members']
-            anime['score'] = anime_genres_members['score']
+            print (anime_genres_members.keys())
+            genres = anime_genres_members["genres"]
+            members = anime_genres_members["members"]
+            scores = anime_genres_members["score"]
+            anime['genres']= str(genres)
+            anime['members']= members
+            anime['score'] = float(scores)
             if anime_in_database(anime_id) is None:
                 genre = str(anime['genres'])
-                new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']), members = anime['members'], score = anime['score'])
+                new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']), members = int(anime['members']), score = anime['score'])
                 db.session.add(new_anime)
         if db.session.new:
             print ("new session")
@@ -99,7 +104,7 @@ def get_anime_genre():
     return helper_get_needed_data_of_anime(request.args.get("id"))
 
 def helper_get_needed_data_of_anime(anime_id):
-    return helper_get_genre_of_anime(request.args.get("id"))
+    return helper_get_genre_of_anime(anime_id)
 
 def helper_get_genre_of_anime(anime_id):
     #gets genre of anime given ID, scraped from MAL using BeautifulSoup, can replace later w database.
@@ -108,17 +113,30 @@ def helper_get_genre_of_anime(anime_id):
         animepage = requests.get(URL).text
         soup = BeautifulSoup(animepage, 'lxml')
         genres = soup.find_all('span', itemprop='genre')
+        print ("members")
         members = soup.find("span", class_ = "numbers members").text
-        members = (members[8:])
+        members = members.split(' ', 1)[1]
         members = int(members.replace(",", ''))
-        score = float(soup.find("div", class_ = "score-label").text)
-        members = soup.find_all("div", )
+        print (type(members))
+        print (members)
+        print ("scores")
         genre_list= []
         for g in genres:
             genre_list.append(g.string)
-        return {"genres": genre_list, "members": members, "score": score, "statusCode": 200}
-    except:
-        return {"errorMessage": "Errored out", "statusCode": 400}
+        if (soup.find("div", class_ = "score-label")) is None:
+            score = float(0)
+        else:
+            score = float(soup.find("div", class_ = "score-label").text)
+        anime_update = {}
+        anime_update['genres'] = genre_list
+        print (members)
+        anime_update['members'] = members
+        anime_update['score'] = score
+        test_id_data = {"genres": genres, "members": members, "score": score}
+        return anime_update
+    except Exception as e:
+        print (e)
+        return {"errorMessage": anime_id, "statusCode": 400}
 
 
 def get_top_three_genres(animes): 
