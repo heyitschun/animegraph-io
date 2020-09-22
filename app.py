@@ -65,10 +65,10 @@ def get_user_watch_history():
                 scores = anime_genres_members["score"]
                 anime['genres']= genres
                 anime['members']= members
-                anime['score'] = float(scores)
+                anime['MAL_score'] = float(scores)
                 if anime_in_database(anime_id) is None:
                     genre = str(anime['genres'])
-                    new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']), members = int(anime['members']), score = anime['score'])
+                    new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']), members = int(anime['members']), score = anime['MAL_score'])
                     db.session.add(new_anime)
             if db.session.new:
                 print ("new session")
@@ -79,9 +79,9 @@ def get_user_watch_history():
             i += 1
             r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed/' + str(i))
             userdata = json.loads(r.text)
-            print (userdata)
-    
+    total_anime_history = [anime for anime in total_anime_history if anime["MAL_score"]>0]
     data = {"data": total_anime_history, "statusCode": 200}
+
     top_three = get_complete_list(data)
     return top_three
 
@@ -122,13 +122,9 @@ def helper_get_genre_of_anime(anime_id):
         animepage = requests.get(URL).text
         soup = BeautifulSoup(animepage, 'lxml')
         genres = soup.find_all('span', itemprop='genre')
-        print ("members")
         members = soup.find("span", class_ = "numbers members").text
         members = members.split(' ', 1)[1]
         members = int(members.replace(",", ''))
-        print (type(members))
-        print (members)
-        print ("scores")
         genre_list= []
         for g in genres:
             genre_list.append(g.string)
@@ -138,13 +134,11 @@ def helper_get_genre_of_anime(anime_id):
             score = float(soup.find("div", class_ = "score-label").text)
         anime_update = {}
         anime_update['genres'] = genre_list
-        print (members)
         anime_update['members'] = members
         anime_update['score'] = score
         test_id_data = {"genres": genres, "members": members, "score": score}
         return anime_update
-    except Exception as e:
-        print (e)
+    except:
         return {"errorMessage": anime_id, "statusCode": 400}
 
 

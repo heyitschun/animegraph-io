@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Kufam:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Kufam:wght@400;700&display=swap");
 
-@import url('https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700&display=swap");
 
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap");
 
 /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
 
@@ -18620,6 +18620,10 @@ video {
   animation: bounce 1s infinite;
 }
 
+.anime-list {
+  height: 32rem;
+}
+
 .loading {
   position: relative;
   width: 80px;
@@ -18655,7 +18659,8 @@ video {
     height: 64px;
   }
 
-  50%, 100% {
+  50%,
+  100% {
     top: 24px;
     height: 32px;
   }
