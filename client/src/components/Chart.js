@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { interpolateCool, scaleSequential, scaleTime } from "d3";
+import { interpolateCool, scaleSequential, scaleTime, timeFormat } from "d3";
 import { axisTop, axisRight } from "d3-axis";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
@@ -8,7 +8,6 @@ import objectMap from "../helpers/objectMap";
 import InfoModal from "./InfoModal";
 
 function Chart({ data, username, width }) {
-  console.log("CHARTS.JS>>>", data);
   const [genres, setGenres] = useState([]);
   const [chartDims, setChartDims] = useState({ width: width, height: 600 });
 
@@ -17,6 +16,9 @@ function Chart({ data, username, width }) {
   const [anime, setAnime] = useState({});
   const [animeBubbles, setAnimeBubbles] = useState([]);
 
+  // 3 is All
+  const [activeGenreKey, setActiveGenreKey] = useState("All");
+
   let scoreDomain = [Infinity, 0];
   let dateDomain = [Infinity, 0];
   let memberDomain = [Infinity, 0];
@@ -24,11 +26,11 @@ function Chart({ data, username, width }) {
 
   useEffect(() => {
     setGenres(Object.keys(data));
+    setAnimeBubbles(animes);
   }, [data]);
 
   objectMap(data, (genre) => {
     animes = [...genre.animes, ...animes];
-    console.log(animes);
   });
   animes.forEach((a) => {
     if (a.MAL_score > scoreDomain[1]) scoreDomain[1] = a.MAL_score;
@@ -42,8 +44,6 @@ function Chart({ data, username, width }) {
     if (members > memberDomain[1]) memberDomain[1] = members;
     else if (members < memberDomain[1]) memberDomain[0] = members;
   });
-
-  console.log(scoreDomain);
 
   // d3.js stuff START
 
@@ -70,22 +70,22 @@ function Chart({ data, username, width }) {
     .range([chartDims.height, 0]);
 
   // Axes
-  const xAxis = axisTop().scale(dateScale).ticks(10);
+  const xAxis = axisTop().scale(dateScale);
 
-  const yAxis = axisRight().scale(scoreScale).ticks(10);
-
+  const yAxis = axisRight().scale(scoreScale);
+  //yAxis.tickSizeOuter(0);
   // d3.js stuff END
 
   let genreFilter;
 
   // Event handlers
 
-  const plotGenre = (e) => {
+  const plotGenre = (e, g) => {
     e.preventDefault();
+    setActiveGenreKey(g);
     if (e.target.innerHTML !== "All") {
       let animesgenre = data[e.target.innerHTML];
       animes = [...animesgenre.animes];
-      console.log(animes);
     }
     setAnimeBubbles(animes);
   };
@@ -102,8 +102,10 @@ function Chart({ data, username, width }) {
     return (
       <button
         key={i}
-        className="focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 bg-white text-black my-2 rounded text-indigo-900 hover:text-white hover:bg-indigo-900 border mx-2"
-        onClick={(e) => plotGenre(e)}
+        className={`focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 text-white my-2 rounded hover:text-white border mx-2 ${
+          activeGenreKey === g ? "bg-indigo-500" : ""
+        }`}
+        onClick={(e) => plotGenre(e, g)}
       >
         {g}
       </button>
@@ -114,7 +116,7 @@ function Chart({ data, username, width }) {
   let ratingsLegend = Object.keys(ratings).map((r, i) => {
     return (
       <button
-        className="cursor-text focus:outline-none rounded-full m-2 bg-white font-bold text-black text-sm w-12 h-12 text-center items-center"
+        className="cursor-text focus:outline-none rounded-full my-2 mx-1 bg-white font-bold text-black text-xs w-10 h-10 text-center items-center"
         style={{ backgroundColor: ratings[r] }}
         key={i}
       >
@@ -125,11 +127,6 @@ function Chart({ data, username, width }) {
 
   return (
     <div className="flex flex-row">
-      {/*
-      <div className="">
-        <span style={{ position: "abso" }}>MyAnimeList Score</span>
-      </div>
-      */}
       <div className="text-white flex flex-col">
         <InfoModal
           setShowInfo={setShowInfo}
@@ -147,7 +144,11 @@ function Chart({ data, username, width }) {
           {username}
         </a>
         <div className="w-full">
-          <svg width={chartDims.width} height={chartDims.height}>
+          <svg
+            width={chartDims.width}
+            height={chartDims.height}
+            style={{ "padding-bottom": "0px" }}
+          >
             {animeBubbles.map((a, i) => (
               <a key={i} href={a.url} target="_blank" rel="noopener noreferrer">
                 <circle
@@ -162,9 +163,6 @@ function Chart({ data, username, width }) {
               </a>
             ))}
             <g>
-              <g>
-                <text className="z-10 text-white"> SOME TEXT</text>
-              </g>
               <g
                 ref={(node) => select(node).call(xAxis)}
                 className="z-10"
@@ -174,13 +172,15 @@ function Chart({ data, username, width }) {
             </g>
           </svg>
         </div>
-        <div className="text-center tracking-wider font-bold text-sm mb-6 mt-5 w-full">
-          Date Anime Released
+        <div className="text-center tracking-wider font-bold text-sm mb-4 mt-4 w-full">
+          Date Released
         </div>
         <div className="flex justify-center">
           <button
-            className="focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 bg-white text-black my-2 rounded text-indigo-900 hover:text-white hover:bg-indigo-900 border mx-2"
-            onClick={(e) => plotGenre(e)}
+            className={`focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 text-white my-2 rounded hover:text-white border mx-2 ${
+              activeGenreKey === "All" ? "bg-indigo-700" : ""
+            }`}
+            onClick={(e) => plotGenre(e, "All")}
           >
             All
           </button>

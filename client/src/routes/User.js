@@ -18,6 +18,7 @@ function User({ match }) {
   let display = null;
   let chart = null;
   let animes = [];
+  let YLabel = "";
 
   useEffect(() => {
     setChartWidth(chartWidthRef.current.getBoundingClientRect().width);
@@ -76,6 +77,7 @@ function User({ match }) {
     });
 
     chart = <Chart data={data.data} username={user} width={chartWidth} />;
+    YLabel = "MyAnimeList Score";
   }
 
   return (
@@ -86,21 +88,34 @@ function User({ match }) {
         anime={anime}
         infoPos={infoPos}
       />
-      <div className="mt-32 mx-10 lg:mx-64 flex flex-row flex-1 text-white">
+      <div className="mt-8 mx-10 lg:mx-64 flex flex-row flex-1 text-white">
         {/* Left */}
-        <div className="w-1/5 border"></div>
+        <div className="w-1/5 "></div>
 
         {/* Middle */}
-        <div ref={chartWidthRef} className="w-3/5 mx-10">
-          {chart}
+        <div className="w-3/5 mr-10 ml-5 flex flex-row">
+          <div
+            className="text-white fold-bold w-1/12 flex justify-center items-center relative"
+            style={{ height: "650px" }}
+          >
+            <span className="block transform -rotate-90 absolute font-bold text-center tracking-widest text-sm w-64 ml-3">
+              {YLabel}
+            </span>
+          </div>
+          <div ref={chartWidthRef} className="w-11/12">
+            {chart}
+          </div>
         </div>
 
         {/* Right */}
         <div className="w-1/5" style={{ height: "41rem" }}>
           {animes.length !== 0 && (
-            <div className="mt-12 font-bold text-lg tracking-wider text-white">
-              User Anime List
-            </div>
+            <>
+              <div className="mt-12 font-bold text-lg tracking-widest text-white">
+                User Anime List
+              </div>
+              <hr className="mr-24" />
+            </>
           )}
           <ul className="overflow-y-auto" style={{ height: "38rem" }}>
             <motion.div
