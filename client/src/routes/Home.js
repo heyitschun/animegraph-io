@@ -17,7 +17,7 @@ function Home({ user }) {
           transition={{ delay: 0.5, type: "spring", stiffness: 120 }}
         >
           <div className="text-center text-white font-kufam tracking-wider font-bold text-2xl">
-            AnimeGraph-io
+            Slice of Seikatsu
           </div>
         </motion.div>
         <motion.div

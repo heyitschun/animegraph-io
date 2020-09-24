@@ -46,31 +46,45 @@ from app import db
 def get_user_watch_history():
     #gets list of top 10 rated animes by user, anime info stored in dictionaries.
     user = request.args.get("user")
+    data = {}
+    total_anime_history = []
+    i = 1
     r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed')
-    if r.status_code == 200:
-        #transforms API call to readable data
-        userdata = json.loads(r.text)
-        anime_history = sorted(userdata['anime'], key=itemgetter('score'))
-        for anime in anime_history:
-            anime_id = anime['mal_id']
-            anime_genres_members = get_needed_data_from_database(anime_id)
-            anime['genres']= anime_genres_members['genres']
-            anime['members']= anime_genres_members['members']
-            anime['score'] = anime_genres_members['score']
-            if anime_in_database(anime_id) is None:
-                genre = str(anime['genres'])
-                new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']), members = anime['members'], score = anime['score'])
-                db.session.add(new_anime)
-        if db.session.new:
-            print ("new session")
-            db.session.commit()
-            db.session.execute("UPDATE animes SET genre = REPLACE(REPLACE(REPLACE(genre, '[', ''), ']', ''), '''', '')")
-            db.session.commit()
-        data = {"data": anime_history, "statusCode": 200}
-        top_three = get_complete_list(data)
-        return top_three
-    else:
-        return {"data": "Failed", "statusCode": 600}
+    userdata = json.loads(r.text)
+    while 'anime' in userdata.keys() and len(userdata['anime']) != 0:
+            #transforms API call to readable data
+            userdata = json.loads(r.text)
+            anime_history = sorted(userdata['anime'], key=itemgetter('score'))
+            for anime in anime_history:
+                anime_id = anime['mal_id']
+                print (anime_id)
+                anime_genres_members = get_needed_data_from_database(anime_id)
+                print (anime_genres_members.keys())
+                genres = anime_genres_members["genres"]
+                members = anime_genres_members["members"]
+                scores = anime_genres_members["score"]
+                anime['genres']= genres
+                anime['members']= members
+                anime['MAL_score'] = float(scores)
+                if anime_in_database(anime_id) is None:
+                    genre = str(anime['genres'])
+                    new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']), members = int(anime['members']), score = anime['MAL_score'])
+                    db.session.add(new_anime)
+            if db.session.new:
+                print ("new session")
+                db.session.commit()
+                db.session.execute("UPDATE animes SET genre = REPLACE(REPLACE(REPLACE(genre, '[', ''), ']', ''), '''', '')")
+                db.session.commit()
+            total_anime_history = total_anime_history + anime_history
+            i += 1
+            r = requests.get('https://api.jikan.moe/v3/user/' + user +'/animelist/completed/' + str(i))
+            userdata = json.loads(r.text)
+    total_anime_history = [anime for anime in total_anime_history if anime["MAL_score"]>0]
+    data = {"data": total_anime_history, "statusCode": 200}
+
+    top_three = get_complete_list(data)
+    return top_three
+
 
 def anime_in_database(test_id):
     genre = animes.query.filter_by(anime_id= test_id).first()
@@ -99,7 +113,7 @@ def get_anime_genre():
     return helper_get_needed_data_of_anime(request.args.get("id"))
 
 def helper_get_needed_data_of_anime(anime_id):
-    return helper_get_genre_of_anime(request.args.get("id"))
+    return helper_get_genre_of_anime(anime_id)
 
 def helper_get_genre_of_anime(anime_id):
     #gets genre of anime given ID, scraped from MAL using BeautifulSoup, can replace later w database.
@@ -109,16 +123,23 @@ def helper_get_genre_of_anime(anime_id):
         soup = BeautifulSoup(animepage, 'lxml')
         genres = soup.find_all('span', itemprop='genre')
         members = soup.find("span", class_ = "numbers members").text
-        members = (members[8:])
+        members = members.split(' ', 1)[1]
         members = int(members.replace(",", ''))
-        score = float(soup.find("div", class_ = "score-label").text)
-        members = soup.find_all("div", )
         genre_list= []
         for g in genres:
             genre_list.append(g.string)
-        return {"genres": genre_list, "members": members, "score": score, "statusCode": 200}
+        if (soup.find("div", class_ = "score-label")) is None:
+            score = float(0)
+        else:
+            score = float(soup.find("div", class_ = "score-label").text)
+        anime_update = {}
+        anime_update['genres'] = genre_list
+        anime_update['members'] = members
+        anime_update['score'] = score
+        test_id_data = {"genres": genres, "members": members, "score": score}
+        return anime_update
     except:
-        return {"errorMessage": "Errored out", "statusCode": 400}
+        return {"errorMessage": anime_id, "statusCode": 400}
 
 
 def get_top_three_genres(animes): 
@@ -126,8 +147,6 @@ def get_top_three_genres(animes):
     # add genre to dictionary if the genre is not in dictionary keys, otherwise increase value by 1
     dict_of_genres = {} # {"Shounen": 5, "Adventure": 10}
     for a in data:
-        if a["score"] < 0:
-            continue
         for g in a["genres"]:
             if g not in dict_of_genres.keys():
                 dict_of_genres[g] = {}
