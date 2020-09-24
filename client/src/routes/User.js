@@ -26,6 +26,7 @@ function User({ match }) {
 
   const handleAnime = (e) => {
     e.persist();
+    console.log(e.target.innerHTML);
     let animeUnderCursor = animes.filter((a) => a.title === e.target.innerHTML);
     setAnime(animeUnderCursor[0]);
     setInfoPos({ left: e.screenX, top: e.screenY });
@@ -34,13 +35,13 @@ function User({ match }) {
 
   if (data.error) {
     chart = [
-      <li className="text-center mt-48 font-mono">Something went wrong :(</li>,
-      <li className="justify-center flex mt-5">
+      <div className="text-center mt-48 font-mono">Something went wrong :(</div>,
+      <div className="justify-center flex mt-5">
         <button className="focus:outline-none">
           <RetryIcon />
         </button>
-      </li>,
-      <li className="font-mono text-center mt-2 text-sm">Retry</li>,
+      </div>,
+      <div className="font-mono text-center mt-2 text-sm">Retry</div>,
     ];
   }
 
@@ -68,7 +69,9 @@ function User({ match }) {
       return (
         <motion.div key={i} className="my-1">
           <li>
-            <button className="hover:text-indigo-200 text-sm text-left focus:outline-none">
+            <button
+              className="hover:text-indigo-200 text-sm text-left focus:outline-none"
+            >
               {anime.title}
             </button>
           </li>
@@ -82,15 +85,10 @@ function User({ match }) {
 
   return (
     <div className="min-h-screen w-full flex flex-col">
-      <InfoModal
-        setShowInfo={setShowInfo}
-        showInfo={showInfo}
-        anime={anime}
-        infoPos={infoPos}
-      />
       <div className="mt-8 mx-10 lg:mx-64 flex flex-row flex-1 text-white">
+
         {/* Left */}
-        <div className="w-1/5 "></div>
+        <div className="w-1/5"></div>
 
         {/* Middle */}
         <div className="w-3/5 mr-10 ml-5 flex flex-row">
@@ -111,10 +109,10 @@ function User({ match }) {
         <div className="w-1/5" style={{ height: "41rem" }}>
           {animes.length !== 0 && (
             <>
-              <div className="mt-12 font-bold text-lg tracking-widest text-white">
-                User Anime List
+              <div className="mt-12 font-bold text-base lg:text-lg tracking-widest text-white">
+                Your Popular Animes
               </div>
-              <hr className="mr-24" />
+              <hr className="mr-10 lg:mr-24" />
             </>
           )}
           <ul className="overflow-y-auto" style={{ height: "38rem" }}>
