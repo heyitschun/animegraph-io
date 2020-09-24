@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { interpolateCool, scaleSequential, scaleTime, timeFormat } from "d3";
 import { axisTop, axisRight } from "d3-axis";
 import { scaleLinear } from "d3-scale";
@@ -16,7 +15,6 @@ function Chart({ data, username, width }) {
   const [anime, setAnime] = useState({});
   const [animeBubbles, setAnimeBubbles] = useState([]);
 
-  // 3 is All
   const [activeGenreKey, setActiveGenreKey] = useState("All");
 
   let scoreDomain = [Infinity, 0];
@@ -102,7 +100,7 @@ function Chart({ data, username, width }) {
     return (
       <button
         key={i}
-        className={`focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 text-white my-2 rounded hover:text-white border mx-2 ${
+        className={`focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 text-white my-2 rounded hover:bg-indigo-700 hover:text-white border mx-2 ${
           activeGenreKey === g ? "bg-indigo-500" : ""
         }`}
         onClick={(e) => plotGenre(e, g)}
@@ -147,10 +145,9 @@ function Chart({ data, username, width }) {
           <svg
             width={chartDims.width}
             height={chartDims.height}
-            style={{ "padding-bottom": "0px" }}
+            style={{ "paddingBottom": "0" }}
           >
             {animeBubbles.map((a, i) => (
-              <a key={i} href={a.url} target="_blank" rel="noopener noreferrer">
                 <circle
                   fillOpacity="0.7"
                   cx={dateScale(new Date(a.start_date))}
@@ -160,7 +157,6 @@ function Chart({ data, username, width }) {
                   fill={ratings[a.rating]}
                   onMouseEnter={(e) => handleAnime(e, a.title)}
                 />
-              </a>
             ))}
             <g>
               <g
@@ -186,10 +182,24 @@ function Chart({ data, username, width }) {
           </button>
           {genreFilter}
         </div>
-        <div className="text-center tracking-wider font-bold text-sm mt-10 w-full">
-          Legend
+        <div>
+          <div className="text-center tracking-wider font-bold text-sm mt-10 w-full">
+            Legend
+          </div>
+          <div className="flex justify-center">
+            <span className="w-1/5 text-xs font-bold flex items-center text-left">PG Rating</span>
+            <div className="w-4/5">
+              {ratingsLegend}
+            </div>
+          </div>
+          <div className="flex mt-1 justify-center">
+            <span className="w-1/5 text-xs font-bold flex items-center text-left">Community</span>
+            <div className="w-4/5">
+              {/* Members legend */}
+            </div>
+          </div>
+           <div></div>
         </div>
-        <div className="flex justify-center">{ratingsLegend}</div>
       </div>
     </div>
   );
