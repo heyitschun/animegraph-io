@@ -1,17 +1,61 @@
+@import url("https://fonts.googleapis.com/css2?family=Kufam:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@400;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+circle:hover {
+  fill-opacity: 1;
+  stroke: rgb(255, 255, 255);
+  stroke-width: 1;
+  /* fill: url("https://images-na.ssl-images-amazon.com/images/I/41geYlQe6-L._AC_SY450_.jpg"); */
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.active-bubble {
+  fill-opacity: 1;
+  stroke: #fff;
+  stroke-width: 1;
+}
+
+.anime-list {
+  height: 32rem;
+}
+
+.loading {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.loading div {
+  position: absolute;
+  left: 8px;
+  width: 16px;
+  background: #fff;
+  animation: loading 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+}
+.loading div:nth-child(1) {
+  left: 8px;
+  animation-delay: -0.24s;
+}
+.loading div:nth-child(2) {
+  left: 32px;
+  animation-delay: -0.12s;
+}
+.loading div:nth-child(3) {
+  left: 56px;
+  animation-delay: 0;
+}
+@keyframes loading {
+  0% {
+    top: 8px;
+    height: 64px;
+  }
+  50%,
+  100% {
+    top: 24px;
+    height: 32px;
+  }
 }

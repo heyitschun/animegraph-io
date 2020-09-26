@@ -1,0 +1,7 @@
+__pycache__
+.env
+.vim
+.vscode
+NOTES.md
+venv
+client/node_modules

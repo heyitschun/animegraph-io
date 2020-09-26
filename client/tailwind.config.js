@@ -1,11 +1,26 @@
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 module.exports = {
   future: {
-    removeDeprecatedGapUtilities: true
+    purgeLayersByDefault: true,
+    removeDeprecatedGapUtilities: true,
   },
-  purge: [],
+  purge: {
+    enabled: true,
+    content: [
+      "./src/**/*.html",
+      "./src/**/*.js"
+    ]
+  },
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        kufam: ["Kufam", "sans-serif"],
+        sans: ["Dosis", ...defaultTheme.fontFamily.sans],
+        mono: ["Ubuntu Mono", ...defaultTheme.fontFamily.mono],
+      },
+    },
   },
   variants: {},
   plugins: [],
-}
+};
