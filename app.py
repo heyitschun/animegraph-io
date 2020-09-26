@@ -21,8 +21,8 @@ app = Flask(__name__, static_folder="build", static_url_path="/")
 
 app.config['SECRET_KEY'] = os.urandom(32)
 POSTGRES = {
-    'user': "username",
-    'pw': "password",
+    'user': os.getenv("POSTGRES_USER"),
+    'pw': os.getenv("POSTGRES_PASS"),
     'db': 'anime_list',
     'host': 'localhost',
     'port': '5432',
@@ -58,9 +58,7 @@ def get_user_watch_history():
             anime_history = sorted(userdata['anime'], key=itemgetter('score'))
             for anime in anime_history:
                 anime_id = anime['mal_id']
-                print (anime_id)
                 anime_genres_members = get_needed_data_from_database(anime_id)
-                print (anime_genres_members.keys())
                 genres = anime_genres_members["genres"]
                 members = anime_genres_members["members"]
                 scores = anime_genres_members["score"]
@@ -72,7 +70,6 @@ def get_user_watch_history():
                     new_anime = animes(anime_id = anime_id, title = anime['title'], genre = str(anime['genres']), members = int(anime['members']), score = anime['MAL_score'])
                     db.session.add(new_anime)
             if db.session.new:
-                print ("new session")
                 db.session.commit()
                 db.session.execute("UPDATE animes SET genre = REPLACE(REPLACE(REPLACE(genre, '[', ''), ']', ''), '''', '')")
                 db.session.commit()
@@ -175,9 +172,8 @@ def get_complete_list(animes):
             value["animes"] = value["animes"][:proper_length]
     return top_three
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def catch_all(path):
+@app.errorhandler(404)
+def not_found(e):
     return app.send_static_file("index.html")
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAxiosRequest } from "../hooks/HttpRequest";
 import objectMap from "../helpers/objectMap";
@@ -7,6 +8,7 @@ import RetryIcon from "../components/icons/RetryIcon";
 import Chart from "../components/Chart";
 
 function User({ match }) {
+  const history = useHistory();
   const [showInfo, setShowInfo] = useState(false);
   const [infoPos, setInfoPos] = useState({ left: 0, top: 0 });
   const [chartWidth, setChartWidth] = useState(0);
@@ -25,7 +27,6 @@ function User({ match }) {
   }, []);
 
   useEffect(() => {
-    console.log(animeBubbles);
     display = animeBubbles.map((anime, i) => {
       return (
         <motion.div key={i} className="my-1">
@@ -50,13 +51,13 @@ function User({ match }) {
 
   if (data.error) {
     chart = [
-      <li className="text-center mt-48 font-mono">Something went wrong :(</li>,
-      <li className="justify-center flex mt-5">
-        <button className="focus:outline-none">
+      <div className="text-center mt-48 font-mono">Something went wrong :(</div>,
+      <div className="justify-center flex mt-5">
+        <button className="focus:outline-none" onClick={() => history.go(0)}>
           <RetryIcon />
         </button>
-      </li>,
-      <li className="font-mono text-center mt-2 text-sm">Retry</li>,
+      </div>,
+      <div className="font-mono text-center mt-2 text-sm">Retry</div>,
     ];
   }
 
@@ -141,7 +142,7 @@ function User({ match }) {
                 )}
               </>
             ) : (
-              <img />
+              <></>
             )}
           </div>
         </div>
