@@ -3,16 +3,16 @@ import { motion } from "framer-motion";
 import { useAxiosRequest } from "../hooks/HttpRequest";
 import objectMap from "../helpers/objectMap";
 import Footer from "../components/Footer";
-import InfoModal from "../components/InfoModal";
 import RetryIcon from "../components/icons/RetryIcon";
 import Chart from "../components/Chart";
 
 function User({ match }) {
   const [showInfo, setShowInfo] = useState(false);
   const [infoPos, setInfoPos] = useState({ left: 0, top: 0 });
-  const [anime, setAnime] = useState({});
   const [chartWidth, setChartWidth] = useState(0);
   const chartWidthRef = useRef(0);
+  const [anime, setAnime] = useState({});
+  const [animeBubbles, setAnimeBubbles] = useState([]);
   const user = match.params.user;
   let data = useAxiosRequest(user);
   let display = null;
@@ -24,24 +24,39 @@ function User({ match }) {
     setChartWidth(chartWidthRef.current.getBoundingClientRect().width);
   }, []);
 
-  const handleAnime = (e) => {
+  useEffect(() => {
+    console.log(animeBubbles);
+    display = animeBubbles.map((anime, i) => {
+      return (
+        <motion.div key={i} className="my-1">
+          <li>
+            <button
+              className="hover:text-indigo-200 text-sm text-left focus:outline-none"
+              onMouseEnter={(e) => handleAnime(e, anime.title)}
+            >
+              {anime.title}
+            </button>
+          </li>
+        </motion.div>
+      );
+    });
+  }, [animeBubbles]);
+
+  const handleAnime = (e, title) => {
     e.persist();
-    console.log(e.target.innerHTML);
-    let animeUnderCursor = animes.filter((a) => a.title === e.target.innerHTML);
+    let animeUnderCursor = animes.filter((a) => a.title === title);
     setAnime(animeUnderCursor[0]);
-    setInfoPos({ left: e.screenX, top: e.screenY });
-    setShowInfo(true);
   };
 
   if (data.error) {
     chart = [
-      <div className="text-center mt-48 font-mono">Something went wrong :(</div>,
-      <div className="justify-center flex mt-5">
+      <li className="text-center mt-48 font-mono">Something went wrong :(</li>,
+      <li className="justify-center flex mt-5">
         <button className="focus:outline-none">
           <RetryIcon />
         </button>
-      </div>,
-      <div className="font-mono text-center mt-2 text-sm">Retry</div>,
+      </li>,
+      <li className="font-mono text-center mt-2 text-sm">Retry</li>,
     ];
   }
 
@@ -71,6 +86,7 @@ function User({ match }) {
           <li>
             <button
               className="hover:text-indigo-200 text-sm text-left focus:outline-none"
+              onMouseEnter={(e) => handleAnime(e, anime.title)}
             >
               {anime.title}
             </button>
@@ -79,16 +95,56 @@ function User({ match }) {
       );
     });
 
-    chart = <Chart data={data.data} username={user} width={chartWidth} />;
+    chart = (
+      <Chart
+        data={data.data}
+        username={user}
+        width={chartWidth}
+        anime={anime}
+        setAnime={setAnime}
+        handleAnime={handleAnime}
+        animeBubbles={animeBubbles}
+        setAnimeBubbles={setAnimeBubbles}
+      />
+    );
     YLabel = "MyAnimeList Score";
   }
 
   return (
     <div className="min-h-screen w-full flex flex-col">
       <div className="mt-8 mx-10 lg:mx-64 flex flex-row flex-1 text-white">
-
         {/* Left */}
-        <div className="w-1/5"></div>
+        <div className="w-1/5 mt-12">
+          <div className="text-sm break-normal">
+            {anime.title ? (
+              <>
+                <span className="font-bold text-lg tracking-widest text-white">
+                  {anime.title}
+                </span>
+                <hr className="mb-2 mr-4" />
+                <img src={anime.image_url} alt={anime.title} />
+                <br />
+                <span>User Score: {anime.score}</span>
+                <br />
+                <span>MAL Score: {anime.MAL_score}</span>
+                <br />
+                <span>Members: {anime.members}</span>
+                <br />
+                <br />
+                <span>Genres: {anime.genres.join(", ")}</span>
+                <br />
+                {anime.tags && (
+                  <span>
+                    <br />
+                    User Thoughts: <br /> {anime.tags}
+                  </span>
+                )}
+              </>
+            ) : (
+              <img />
+            )}
+          </div>
+        </div>
 
         {/* Middle */}
         <div className="w-3/5 mr-10 ml-5 flex flex-row">
@@ -109,10 +165,10 @@ function User({ match }) {
         <div className="w-1/5" style={{ height: "41rem" }}>
           {animes.length !== 0 && (
             <>
-              <div className="mt-12 font-bold text-base lg:text-lg tracking-widest text-white">
-                Your Popular Animes
+              <div className="mt-12 font-bold text-lg tracking-widest text-white">
+                User Anime List
               </div>
-              <hr className="mr-10 lg:mr-24" />
+              <hr className="mr-24" />
             </>
           )}
           <ul className="overflow-y-auto" style={{ height: "38rem" }}>

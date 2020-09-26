@@ -4,7 +4,7 @@ import { Home, User } from "./routes";
 
 function App() {
   return (
-    <div className="bg-indigo-900 min-h-screen">
+    <div className="bg-gray-900 min-h-screen">
       <Router>
         <div className="flex justify-center">
           <Switch>

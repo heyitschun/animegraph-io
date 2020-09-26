@@ -1,10 +1,24 @@
 @import url("https://fonts.googleapis.com/css2?family=Kufam:wght@400;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@400;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+circle:hover {
+  fill-opacity: 1;
+  stroke: rgb(255, 255, 255);
+  stroke-width: 1;
+  /* fill: url("https://images-na.ssl-images-amazon.com/images/I/41geYlQe6-L._AC_SY450_.jpg"); */
+}
+
+.active-bubble {
+  fill-opacity: 1;
+  stroke: #fff;
+  stroke-width: 1;
+}
 
 .anime-list {
   height: 32rem;

@@ -1,20 +1,27 @@
-import React, { useEffect, useRef, useState } from "react";
-import { interpolateCool, scaleSequential, scaleTime, timeFormat } from "d3";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { interpolateCool, scaleSequential, scaleTime } from "d3";
 import { axisTop, axisRight } from "d3-axis";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 import objectMap from "../helpers/objectMap";
-import InfoModal from "./InfoModal";
+import HelpIcon from "../components/icons/HelpIcon";
+import MemberModal from "../components/MemberModal";
 
-function Chart({ data, username, width }) {
+function Chart({
+  data,
+  username,
+  width,
+  anime,
+  setAnime,
+  handleAnime,
+  animeBubbles,
+  setAnimeBubbles,
+}) {
   const [genres, setGenres] = useState([]);
   const [chartDims, setChartDims] = useState({ width: width, height: 600 });
-
-  const [showInfo, setShowInfo] = useState(false);
-  const [infoPos, setInfoPos] = useState({ left: 0, top: 0 });
-  const [anime, setAnime] = useState({});
-  const [animeBubbles, setAnimeBubbles] = useState([]);
-
+  const [showMemberHelp, setShowMemberHelp] = useState(false);
+  // 3 is All
   const [activeGenreKey, setActiveGenreKey] = useState("All");
 
   let scoreDomain = [Infinity, 0];
@@ -88,20 +95,12 @@ function Chart({ data, username, width }) {
     setAnimeBubbles(animes);
   };
 
-  const handleAnime = (e, title) => {
-    e.persist();
-    let animeUnderCursor = animes.filter((a) => a.title === title);
-    setAnime(animeUnderCursor[0]);
-    setInfoPos({ left: e.screenX, top: e.screenY });
-    setShowInfo(true);
-  };
-
   genreFilter = genres.map((g, i) => {
     return (
       <button
         key={i}
-        className={`focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 text-white my-2 rounded hover:bg-indigo-700 hover:text-white border mx-2 ${
-          activeGenreKey === g ? "bg-indigo-500" : ""
+        className={`focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 text-white my-2 rounded hover:text-white border mx-2 ${
+          activeGenreKey === g ? "bg-gray-700" : ""
         }`}
         onClick={(e) => plotGenre(e, g)}
       >
@@ -125,30 +124,29 @@ function Chart({ data, username, width }) {
 
   return (
     <div className="flex flex-row">
+      <MemberModal
+        showMemberHelp={showMemberHelp}
+        setShowMemberHelp={setShowMemberHelp}
+      />
       <div className="text-white flex flex-col">
-        <InfoModal
-          setShowInfo={setShowInfo}
-          showInfo={showInfo}
-          anime={anime}
-          infoPos={infoPos}
-        />
-
         <a
           href={`https://myanimelist.net/profile/${username}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="my-3 py-3 px-5 text-center bg-white text-black rounded font-bold font-mono"
+          className="my-3 py-3 px-5 text-center text-white rounded font-bold font-sans"
         >
-          {username}
+          welcome, {username}!
         </a>
         <div className="w-full">
           <svg
             width={chartDims.width}
             height={chartDims.height}
-            style={{ "paddingBottom": "0" }}
+            style={{ "padding-bottom": "0px" }}
           >
             {animeBubbles.map((a, i) => (
+              <a key={i} href={a.url} target="_blank" rel="noopener noreferrer">
                 <circle
+                  class={anime.title === a.title ? "active-bubble" : ""}
                   fillOpacity="0.7"
                   cx={dateScale(new Date(a.start_date))}
                   cy={scoreScale(Number(a.MAL_score))}
@@ -157,6 +155,7 @@ function Chart({ data, username, width }) {
                   fill={ratings[a.rating]}
                   onMouseEnter={(e) => handleAnime(e, a.title)}
                 />
+              </a>
             ))}
             <g>
               <g
@@ -168,13 +167,14 @@ function Chart({ data, username, width }) {
             </g>
           </svg>
         </div>
-        <div className="text-center tracking-wider font-bold text-sm mb-4 mt-4 w-full">
+        <div className="text-center tracking-wider font-bold text-sm mt-4 w-full">
           Date Released
         </div>
-        <div className="flex justify-center">
+
+        <div className="flex justify-center mt-3 mb-6">
           <button
             className={`focus:outline-none transition duration-500 py-1 uppercase font-bold tracking-wider text-xs px-5 text-white my-2 rounded hover:text-white border mx-2 ${
-              activeGenreKey === "All" ? "bg-indigo-700" : ""
+              activeGenreKey === "All" ? "bg-gray-700" : ""
             }`}
             onClick={(e) => plotGenre(e, "All")}
           >
@@ -182,23 +182,32 @@ function Chart({ data, username, width }) {
           </button>
           {genreFilter}
         </div>
-        <div>
-          <div className="text-center tracking-wider font-bold text-sm mt-10 w-full">
-            Legend
+
+        <div className="flex justify-center">
+          <div className="w-1/2 text-center">
+            <div> Maturity Rating </div>
+            <div className="flex justify-center"> {ratingsLegend}</div>
           </div>
-          <div className="flex justify-center">
-            <span className="w-1/5 text-xs font-bold flex items-center text-left">PG Rating</span>
-            <div className="w-4/5">
-              {ratingsLegend}
+          <div className="w-1/2">
+            <div className="text-center">
+              Community Members
+              <button
+                className="focus:outline-none hover:scale-105 ml-2"
+                onClick={() => setShowMemberHelp(true)}
+              >
+                <HelpIcon />
+              </button>
+              <div className="justify-center flex items-center">
+                <button className="border cursor-text focus:outline-none rounded-full my-2 ml-4 mx-1 bg-white font-bold text-black text-xs w-2 h-2 text-center items-center"></button>
+                <button className="cursor-text focus:outline-none rounded-full my-2 ml-4 mx-1 bg-white font-bold text-black text-xs w-4 h-4 text-center items-center"></button>
+                <button className="cursor-text focus:outline-none rounded-full my-2 ml-4 mx-1 bg-white font-bold text-black text-xs w-6 h-6 text-center items-center"></button>
+                <button className="cursor-text focus:outline-none rounded-full my-2 ml-4 mx-1 bg-white font-bold text-black text-xs w-12 h-12 text-center items-center"></button>
+              </div>
+            </div>
+            <div className="text-xs font-bold text-center">
+              <p>&lt; 150K&ensp;250K&ensp;&ensp;350K&ensp;&ensp;&ensp;750k+</p>
             </div>
           </div>
-          <div className="flex mt-1 justify-center">
-            <span className="w-1/5 text-xs font-bold flex items-center text-left">Community</span>
-            <div className="w-4/5">
-              {/* Members legend */}
-            </div>
-          </div>
-           <div></div>
         </div>
       </div>
     </div>

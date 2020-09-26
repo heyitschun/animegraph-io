@@ -17,7 +17,8 @@ import time
 from dotenv import load_dotenv
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="build", static_url_path="/")
+
 app.config['SECRET_KEY'] = os.urandom(32)
 POSTGRES = {
     'user': "username",
@@ -174,10 +175,10 @@ def get_complete_list(animes):
             value["animes"] = value["animes"][:proper_length]
     return top_three
 
-@app.route("/", methods=['GET', 'POST'])
-def login():
-    return "Hello"
-
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return app.send_static_file("index.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
