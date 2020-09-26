@@ -4,4 +4,4 @@ __pycache__
 .vscode
 NOTES.md
 venv
-client/node_modules
+client
