@@ -30,7 +30,7 @@ function MemberModal({ showMemberHelp, setShowMemberHelp }) {
           exit="hidden"
         >
           <motion.div
-            className="m-auto p-4 max-w-lg w-1/6 bg-gray-900 text-white rounded shadow border border-gray-100"
+            className="m-auto p-4 max-w-lg w-1/6 bg-gray-900 text-white rounded border-gray-100"
             style={{ position: "absolute", right: "300px", top: "550px" }}
             variants={helpVariants}
           >
