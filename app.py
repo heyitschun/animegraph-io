@@ -14,6 +14,12 @@ import itertools
 import random
 import time
 
+import anilist as al
+
+print("\n### Anilist START ###")
+print(al.get_anilist_anime(116005))
+print("### Anilist END ###\n")
+
 #from dotenv import load_dotenv
 #load_dotenv()
 
