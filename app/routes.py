@@ -1,51 +1,18 @@
-## This is an unused file
-
 import json
 import os
 import random
 import re
 import requests
 
-from flask import Flask, request
+from flask import request
+from app import app, db
+from app.models import animes
+
 from operator import itemgetter, getitem
 from bs4 import BeautifulSoup
 from sqlalchemy.sql import select
 from collections import OrderedDict
 from itertools import islice
-
-import anilist as al
-
-print("\n### Anilist START ###")
-print(al.get_anilist_anime(116005))
-print("### Anilist END ###\n")
-
-from dotenv import load_dotenv
-load_dotenv()
-
-app = Flask(__name__, static_folder="build", static_url_path="/")
-app.config['SECRET_KEY'] = os.urandom(32)
-
-POSTGRES = {
-    'user': os.getenv("POSTGRES_USER"),
-    'pw': os.getenv("POSTGRES_PASS"),
-    'db': 'anime_list',
-    'host': 'localhost',
-    'port': '5432',
-}
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
-
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy(app)
-
-class animes(db.Model):
-    __tablename__ = 'animes'
-    anime_id = db.Column('anime_id', db.INTEGER, primary_key=True)
-    title = db.Column('title', db.VARCHAR)
-    genre = db.Column('genre', db.VARCHAR)
-    members = db.Column('members', db.INTEGER)
-    score = db.Column('score', db.FLOAT)
 
 @app.route("/api/get-top-ten", methods=["GET"])
 def get_user_watch_history():
@@ -179,6 +146,3 @@ def get_complete_list(animes):
 @app.errorhandler(404)
 def not_found(e):
     return app.send_static_file("index.html")
-
-# if __name__ == '__main__':
-#     app.run(debug=False)
