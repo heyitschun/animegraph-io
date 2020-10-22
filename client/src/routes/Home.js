@@ -8,11 +8,23 @@ function Home({ user }) {
   const [showHelp, setShowHelp] = useState(false);
 
   return (
-    <>
+    <div className="flex mt-5 flex-col">
+      <div className="w-full text-white flex justify-end">
+         <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5, duration: 1 }}
+        >
+          <div className="text-white">
+            <button className="rounded border transition duration-500 hover:text-white hover:bg-gray-900 bg-white text-gray-900 font-bold px-2 py-1 mr-4 tracking-wider w-24 text-sm">Login</button>
+            <button className="rounded border transition duration-500 hover:text-white hover:bg-gray-900 bg-white text-gray-900 font-bold px-2 py-1 mr-4 tracking-wider w-24 text-sm">Signup</button>
+          </div>
+        </motion.div>
+      </div>
       <div className="mt-32 w-full">
         <HelpModal showHelp={showHelp} setShowHelp={setShowHelp} />
         <motion.div
-          initial={{ y: -250 }}
+          initial={{ y: -500 }}
           animate={{ y: 10 }}
           transition={{ delay: 0.5, type: "spring", stiffness: 120 }}
         >
@@ -58,7 +70,7 @@ function Home({ user }) {
           <img src="https://thumbs.gfycat.com/ShadowyBetterJoey-max-1mb.gif"></img>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

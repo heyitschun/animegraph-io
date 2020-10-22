@@ -6,7 +6,7 @@ module.exports = {
     removeDeprecatedGapUtilities: true,
   },
   purge: {
-    enabled: true,
+    enabled: false,
     content: [
       "./src/**/*.html",
       "./src/**/*.js"

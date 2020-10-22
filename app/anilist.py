@@ -21,12 +21,12 @@ query ($id: Int) {
 # The query field 'popularity' used above is not used in the same way by MAL.
 # On MAL, 'favorites' indicates the number of users with the show on a list.
 
-def get_anilist_anime(id):
+def get_anilist_anime(anilist_id):
     """Returns dict with anime information from the Anilist API.
 
     Parameters
     ----------
-    int: id
+    int: anilist_id
        Anilist id of the show.
 
     Returns
@@ -34,7 +34,7 @@ def get_anilist_anime(id):
     dict
         Returns dictionary object containing results from the query.
     """
-    variables = { "id": id }
+    variables = { "id": anilist_id }
     response = requests.post(API_URL, json={"query": QUERY,
                                             "variables": variables})
 
