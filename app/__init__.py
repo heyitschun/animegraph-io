@@ -4,9 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 from app import anilist
 
-print("\n### Anilist START ###")
-print(anilist.get_anilist_anime(116005))
-print("### Anilist END ###\n")
+# print("\n### Anilist START ###")
+# print(anilist.get_anilist_anime(116005))
+# print("### Anilist END ###\n")
 
 POSTGRES = {
     'user': os.getenv("POSTGRES_USER"),
